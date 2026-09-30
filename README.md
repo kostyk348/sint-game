@@ -64,8 +64,11 @@ sintgame compile examples/lighthouse/lore.md -o my_world.json
 # сгенерировать контент в мир (NPC/предмет/локация/квест) под верификацией:
 sintgame add examples/lighthouse/world.json --kind npc -n 2 -o enriched.json
 
-# команда balance — распределение концовок (ищет дисбаланс):
-sintgame balance examples/station/world.json --trials 2000
+# инструменты автора:
+sintgame editor examples/lighthouse/world.json -o editor.html   # HTML-редактор + граф
+sintgame balance examples/lighthouse/world.json --trials 3000  # распределение концовок
+sintgame tune examples/station/world.json -o tuned.json        # авто-тюнинг чисел
+sintgame run examples/lighthouse/world.json --turns 60         # прогон 60 ходов
 ```
 
 Играть свободным текстом (агент-интент + ворота):
@@ -76,7 +79,7 @@ SINT_GEN_CMD="opencode run --pure" \
   --free "обнять Ию, она плачет"
 ```
 
-Тесты: `make test` (или `python -m pytest -q`) — 33 теста, без сети.
+Тесты: `make test` (или `python -m pytest -q`) — 42 теста, без сети.
 
 ## 4. Что уже работает
 
@@ -101,6 +104,10 @@ SINT_GEN_CMD="opencode run --pure" \
 - **Компакция** (`sintgame compact`): свернуть накопленные рантайм-действия в мир (v2) и
   перевалидировать. **Диагностика** (`sintgame diagnose`): какие атрибуты раздувают
   пространство состояний. **Стоимость** — см. [`docs/COST.md`](docs/COST.md).
+- **Инструменты автора** ([`docs/TOOLING.md`](docs/TOOLING.md)): **редактор** (`sintgame editor`
+  — самодостаточный HTML с графом зависимостей и свидетелями), **баланс** (`balance`),
+  **тюнинг** (`tune` — авто-подбор чисел), **прогон** (`run --turns N` — многоэпизодный соак
+  с проверкой инвариантов).
 - **Детерминированный реплей** + режим `--variety` (живость вместо копий).
 - **Сохранение состояния** целиком, **включая `rng`** (иначе сейв/лоад рассинхронится).
 - **Дисциплина prompt-кэша**: стабильный префикс, чтобы кэш нейронки не ломался.
@@ -125,6 +132,7 @@ SINT_GEN_CMD="opencode run --pure" \
 - [`docs/GATE.md`](docs/GATE.md) — модель безопасности: почему «нет» — это фича.
 - [`docs/CACHE.md`](docs/CACHE.md) — два кэша: прозы/интента и prompt-cache нейронки.
 - [`docs/COST.md`](docs/COST.md) — сколько токенов за ход и как снизить (6×).
+- [`docs/TOOLING.md`](docs/TOOLING.md) — редактор, баланс, тюнинг, прогон.
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — что есть, чего нет, что дальше.
 
 ## 7. Лицензия

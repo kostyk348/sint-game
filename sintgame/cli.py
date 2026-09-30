@@ -11,9 +11,12 @@ from . import __version__
 from .compact import compact
 from .compile_world import compile_world
 from .content import KINDS, add_content
+from .editor import write_editor
 from .play import play
+from .run import report as soak_report
 from .schema import simulate, validate
 from .search import diagnose, report as reach_report
+from .tune import tune
 
 
 def main(argv=None):
@@ -47,6 +50,23 @@ def main(argv=None):
     p = sub.add_parser("diagnose", help="почему достижимость не исчерпывается (какие атрибуты раздувают)")
     p.add_argument("world")
     p.add_argument("--cap", type=int, default=50000)
+
+    p = sub.add_parser("editor", help="самодостаточный HTML-редактор мира (граф + свидетели + JSON)")
+    p.add_argument("world")
+    p.add_argument("-o", "--out", default="")
+
+    p = sub.add_parser("run", help="полноценный прогон N ходов с проверкой инвариантов")
+    p.add_argument("world")
+    p.add_argument("--turns", type=int, default=60)
+    p.add_argument("--policy", choices=["random", "explore", "greedy"], default="explore")
+    p.add_argument("--seed", type=int, default=0)
+
+    p = sub.add_parser("tune", help="авто-тюнинг чисел мира под баланс концовок")
+    p.add_argument("world")
+    p.add_argument("-o", "--out", default="")
+    p.add_argument("--trials", type=int, default=300)
+    p.add_argument("--iters", type=int, default=80)
+    p.add_argument("--seed", type=int, default=0)
 
     p = sub.add_parser("play", help="запустить мир детерминированно")
     p.add_argument("world")
@@ -87,11 +107,29 @@ def main(argv=None):
         dist = sim["endings_reached"]
         total = sum(dist.values()) or 1
         print(f"balance: {a.trials} trials | no_ending={sim['no_ending']} "
-              f"dead_ends={sim['dead_ends']} unstable={sim['unstable']}")
+              f"dead_ends={sim['dead_ends']} unstable={sim['unstable']} avg_turns={sim['avg_turns']}")
         for k, v in sorted(dist.items(), key=lambda x: -x[1]):
             print(f"  {k:>16}  {v:5}  {v / total:6.1%}")
         if dist and max(dist.values()) / total > 0.7:
-            print("  WARNING: доминирующая концовка (>70%) — вероятный дисбаланс")
+            print("  WARNING: доминирующая концовка (>70%) — вероятный дисбаланс; попробуйте `sintgame tune`")
+        return 0
+
+    if a.cmd == "editor":
+        print(f"EDITOR -> {write_editor(a.world, a.out or None)}")
+        return 0
+
+    if a.cmd == "run":
+        d = json.load(open(a.world))
+        text, r = soak_report(d, turns=a.turns, policy=a.policy, seed=a.seed)
+        print(text)
+        return 0 if not r["violations"] else 2
+
+    if a.cmd == "tune":
+        d = json.load(open(a.world))
+        tuned, info = tune(d, trials=a.trials, iters=a.iters, seed=a.seed)
+        out = a.out or a.world
+        json.dump(tuned, open(out, "w"), ensure_ascii=False, indent=2)
+        print(f"TUNED -> {out}: " + json.dumps(info, ensure_ascii=False))
         return 0
 
     if a.cmd == "add":

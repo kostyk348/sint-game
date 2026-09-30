@@ -125,12 +125,14 @@ def validate(data):
 
 
 def simulate(data, trials=300, depth=120, seed0=1000):
-    """Random playouts: which endings are reachable, dead-ends, unstable cascades."""
+    """Случайные прогоны: концовки, тупики, нестабильность, средняя длина партии."""
     reached, dead_ends, unstable, no_end = {}, 0, 0, 0
+    lengths = []
     for t in range(trials):
         w = World(copy.deepcopy(data), seed=seed0 + t)
         rng = random.Random(seed0 + t)
-        for _ in range(depth):
+        step = 0
+        for step in range(depth):
             if w.ended:
                 break
             acts = w.available()
@@ -143,10 +145,12 @@ def simulate(data, trials=300, depth=120, seed0=1000):
                 break
         if w.ended:
             reached[w.ended] = reached.get(w.ended, 0) + 1
+            lengths.append(step + 1)
         else:
             no_end += 1
     return {"endings_reached": reached, "dead_ends": dead_ends,
-            "unstable": unstable, "no_ending": no_end, "trials": trials}
+            "unstable": unstable, "no_ending": no_end, "trials": trials,
+            "avg_turns": round(sum(lengths) / len(lengths), 1) if lengths else 0}
 
 
 if __name__ == "__main__":

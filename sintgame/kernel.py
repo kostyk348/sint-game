@@ -10,9 +10,10 @@ import re
 
 
 class World:
-    def __init__(self, data, seed=None):
+    def __init__(self, data, seed=None, nominal=False):
         self.d = data
         self.rng = random.Random(data.get("seed", 0) if seed is None else seed)
+        self.nominal = nominal
         self.e = data["entities"]
         self.flags = dict(data.get("flags", {}))
         self.holds = set(tuple(x) for x in data.get("holds", []))
@@ -69,11 +70,14 @@ class World:
         if isinstance(expr, (int, float)):
             return expr
         if isinstance(expr, dict):
-            v = 0
             m = re.match(r"(\d+)d(\d+)", str(expr.get("roll", "0d0")))
+            v = 0
             if m:
                 n, dz = int(m.group(1)), int(m.group(2))
-                v = sum(self.rng.randint(1, dz) for _ in range(n))
+                if self.nominal:  # абстракция для анализа достижимости: номинал броска
+                    v = int(n * (dz + 1) / 2 + 0.5)
+                else:
+                    v = sum(self.rng.randint(1, dz) for _ in range(n))
             for k in ("plus", "minus"):
                 if k in expr:
                     if k == "minus":

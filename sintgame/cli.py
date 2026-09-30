@@ -11,6 +11,7 @@ from . import __version__
 from .compile_world import compile_world
 from .play import play
 from .schema import simulate, validate
+from .search import report as reach_report
 
 
 def main(argv=None):
@@ -23,8 +24,9 @@ def main(argv=None):
     p.add_argument("-o", "--out", default="world.json")
     p.add_argument("--rounds", type=int, default=3)
 
-    p = sub.add_parser("validate", help="схема + инварианты + симуляция достижимости")
+    p = sub.add_parser("validate", help="схема + инварианты + достижимость (BFS со свидетелями)")
     p.add_argument("world")
+    p.add_argument("--full", action="store_true", help="полный обход (искать тупики/недостижимость, медленнее)")
 
     p = sub.add_parser("play", help="запустить мир детерминированно")
     p.add_argument("world")
@@ -55,6 +57,7 @@ def main(argv=None):
             print("  -", e)
         if not errs:
             print("SIMULATION:", json.dumps(simulate(d), ensure_ascii=False))
+            print(reach_report(d, full=a.full)[0])
         return 0 if not errs else 1
 
     if a.cmd == "play":

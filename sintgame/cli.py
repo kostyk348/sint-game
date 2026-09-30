@@ -28,6 +28,10 @@ def main(argv=None):
     p.add_argument("world")
     p.add_argument("--full", action="store_true", help="полный обход (искать тупики/недостижимость, медленнее)")
 
+    p = sub.add_parser("balance", help="распределение концовок по многим прогонам (баланс)")
+    p.add_argument("world")
+    p.add_argument("--trials", type=int, default=2000)
+
     p = sub.add_parser("play", help="запустить мир детерминированно")
     p.add_argument("world")
     p.add_argument("--script", default="", help="список action id через запятую")
@@ -59,6 +63,19 @@ def main(argv=None):
             print("SIMULATION:", json.dumps(simulate(d), ensure_ascii=False))
             print(reach_report(d, full=a.full)[0])
         return 0 if not errs else 1
+
+    if a.cmd == "balance":
+        d = json.load(open(a.world))
+        sim = simulate(d, trials=a.trials)
+        dist = sim["endings_reached"]
+        total = sum(dist.values()) or 1
+        print(f"balance: {a.trials} trials | no_ending={sim['no_ending']} "
+              f"dead_ends={sim['dead_ends']} unstable={sim['unstable']}")
+        for k, v in sorted(dist.items(), key=lambda x: -x[1]):
+            print(f"  {k:>16}  {v:5}  {v / total:6.1%}")
+        if dist and max(dist.values()) / total > 0.7:
+            print("  WARNING: доминирующая концовка (>70%) — вероятный дисбаланс")
+        return 0
 
     if a.cmd == "play":
         play(a.world, [s.strip() for s in a.script.split(",") if s.strip()],

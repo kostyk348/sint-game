@@ -1,5 +1,9 @@
 # sint-game
 
+![ci](https://github.com/kostyk348/sint-game/actions/workflows/ci.yml/badge.svg)
+![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
+![python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue)
+
 **Детерминированный движок текстовых LLM-игр.** LLM компилирует сценарий из лора и пишет
 прозу — но состояние мира меняет только обычный код, через **ворота**. Отсюда: никаких
 выдуманных чисел, воспроизводимые сейвы, тестируемый баланс, дешёвая генерация контента.

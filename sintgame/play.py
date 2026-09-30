@@ -16,6 +16,7 @@ import json
 import os
 
 from . import intent as I
+from . import memory as M
 from . import prompt as P
 from .cache import path as _cache_path
 from .gen import gen_text
@@ -54,20 +55,24 @@ def load_cache():
         return {}
 
 
-def _mentioned(world, said, d):
+def _referenced_ids(world, said, d):
     text = " ".join(said) + " " + " ".join(d)
-    out = {}
-    for i, e in world.get("entities", {}).items():
-        if i in text and e.get("desc"):
-            out[i] = e["desc"]
-    return out
+    return [i for i in world.get("entities", {}) if i in text]
 
 
-def gen_prose(world, tone, label, said, d, cache, use_llm, variety=False, monitor=None, history=None):
+def _mentioned(world, said, d):
+    return {i: world["entities"][i]["desc"]
+            for i in _referenced_ids(world, said, d) if world["entities"][i].get("desc")}
+
+
+def gen_prose(world, tone, label, said, d, cache, use_llm, variety=False, monitor=None,
+              history=None, facts=None):
     descs = _mentioned(world, said, d)
     hist = " | ".join((history or [])[-4:])
+    facts = facts or []
     key = hashlib.sha1(("|".join([tone, label, "|".join(said), "|".join(d), hist,
-                                  json.dumps(descs, ensure_ascii=False, sort_keys=True)])).encode()).hexdigest()[:16]
+                                  json.dumps(descs, ensure_ascii=False, sort_keys=True),
+                                  "|".join(facts)])).encode()).hexdigest()[:16]
     if not variety and key in cache:
         return cache[key], "(cached)"
     if not use_llm:
@@ -82,6 +87,8 @@ def gen_prose(world, tone, label, said, d, cache, use_llm, variety=False, monito
     ctx = ""
     if hist:
         ctx += f"\nНедавние события (для связности): {hist}"
+    if facts:
+        ctx += f"\nУстановленные ранее факты (долгая память): {' | '.join(facts)}"
     if descs:
         ctx += f"\nОписания упомянутых сущностей: {json.dumps(descs, ensure_ascii=False)}"
     suffix = (f"ЗАДАЧА: напиши прозу. Действие: {label}\n"
@@ -107,6 +114,7 @@ def play(world_path, script, free, use_prose, variety=False, state_in=None, stat
     print(f"== {world.get('title')} | tone={tone} | seed={world.get('seed')} ==")
     turns = list(script)
     history = []
+    flog = M.FactLog()
 
     while not w.ended:
         label = aid = None
@@ -147,11 +155,15 @@ def play(world_path, script, free, use_prose, variety=False, state_in=None, stat
             print("  " + s)
         if d:
             print("  [" + "; ".join(d) + "]")
+        ids = _referenced_ids(world, said, d)
+        facts = flog.relevant(ids, k=6)
         txt, src = gen_prose(world, tone, label, said, d, cache, use_prose, variety, monitor,
-                             history=(history[-context_n:] if context_n else []))
+                             history=(history[-context_n:] if context_n else []), facts=facts)
         if txt:
             print(f"  · {txt}  {src}")
         history.append(label)
+        if said or d:
+            flog.add(len(history), " ".join(said) if said else label, ids)
 
     print("\n== END:", w.ended or "-", "|", w.status())
     print("  " + monitor.report())

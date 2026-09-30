@@ -12,7 +12,7 @@ WOLRD JSON:
   "title": str,
   "tone": str,
   "seed": int,
-  "entities": { "<id>": {"type":str, "tags":[str], "attrs":{ "<name>": number }, "desc": str} },
+  "entities": { "<id>": {"type":str, "tags":[str], "attrs":{ "<name>": number }, "desc": str, "voice": str} },
   "holds":    [ ["<holder_id>", "<item_id>"], ... ],
   "relations":[ ["<from_id>","<to_id>","<type>", number], ... ],
   "flags":    { "<name>": 0|1 },

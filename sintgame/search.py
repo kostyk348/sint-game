@@ -151,6 +151,44 @@ def dangling_prerequisites(data):
     }
 
 
+def diagnose(data, cap=50000):
+    """Почему пространство НЕ исчерпывается: какие числовые атрибуты его раздувают.
+
+    Доказательство НЕдостижимости требует исчерпания пространства, а числовые атрибуты
+    делают его астрономическим. Показывает реальный диапазон и число различных значений
+    по каждому атрибуту — цель для будущей абстракции по порогам.
+    """
+    start = World(copy.deepcopy(data), nominal=True)
+    seen = {_key(start.state())}
+    q = deque()
+    q.append(start.state())
+    vals, capped = {}, False
+    while q:
+        if len(seen) > cap:
+            capped = True
+            break
+        st = q.popleft()
+        w = World(copy.deepcopy(data), nominal=True)
+        w.restore(st)
+        for ent, attrs in st["attrs"].items():
+            for a, v in attrs.items():
+                vals.setdefault(f"{ent}.{a}", set()).add(v)
+        if w.ended or not w.available():
+            continue
+        for a in w.available():
+            nw = World(copy.deepcopy(data), nominal=True)
+            nw.restore(st)
+            nw.act(a["id"])
+            k = _key(nw.state())
+            if k in seen:
+                continue
+            seen.add(k)
+            q.append(nw.state())
+    stats = {k: {"distinct": len(s), "min": min(s), "max": max(s)} for k, s in vals.items()}
+    dominant = sorted(stats.items(), key=lambda kv: -kv[1]["distinct"])[:8]
+    return {"states": len(seen), "capped": capped, "attrs": stats, "dominant": dominant}
+
+
 def report(data, cap=50000, full=False):
     r = reachability(data, cap=cap, stop_when_all_found=not full)
     d = dangling_prerequisites(data)

@@ -29,7 +29,7 @@ SYSTEM = (
 BOUNDARY = "\n---8<--- CACHE BOUNDARY ---8<---\n"
 
 # статичные поля сущности (attrs изменяются -> идут в suffix, не сюда)
-_STATIC_FIELDS = ("type", "tags", "desc")
+_STATIC_FIELDS = ("type", "tags", "desc", "voice")
 
 
 def world_bible(world):

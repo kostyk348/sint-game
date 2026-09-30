@@ -8,11 +8,12 @@ import argparse
 import json
 
 from . import __version__
+from .compact import compact
 from .compile_world import compile_world
 from .content import KINDS, add_content
 from .play import play
 from .schema import simulate, validate
-from .search import report as reach_report
+from .search import diagnose, report as reach_report
 
 
 def main(argv=None):
@@ -38,6 +39,14 @@ def main(argv=None):
     p.add_argument("--kind", choices=list(KINDS), required=True)
     p.add_argument("-n", type=int, default=1)
     p.add_argument("-o", "--out", default="")
+
+    p = sub.add_parser("compact", help="свернуть admitted-действия (.ext.json) в мир и перевалидировать")
+    p.add_argument("world")
+    p.add_argument("-o", "--out", default="")
+
+    p = sub.add_parser("diagnose", help="почему достижимость не исчерпывается (какие атрибуты раздувают)")
+    p.add_argument("world")
+    p.add_argument("--cap", type=int, default=50000)
 
     p = sub.add_parser("play", help="запустить мир детерминированно")
     p.add_argument("world")
@@ -96,6 +105,27 @@ def main(argv=None):
         out = a.out or a.world
         json.dump(w2, open(out, "w"), ensure_ascii=False, indent=2)
         print(f"ADDED -> {out}: " + "; ".join(info))
+        return 0
+
+    if a.cmd == "compact":
+        w2, info = compact(a.world, a.out or None)
+        if not w2:
+            print("COMPACT FAILED:")
+            for x in info:
+                print("  -", x)
+            return 1
+        print(f"COMPACTED -> {a.out or a.world}: " + "; ".join(info))
+        return 0
+
+    if a.cmd == "diagnose":
+        d = json.load(open(a.world))
+        r = diagnose(d, cap=a.cap)
+        print(f"diagnose: states={r['states']} capped={r['capped']}")
+        for k, v in r["dominant"]:
+            print(f"  {k:>22}  distinct={v['distinct']:>5}  range=[{v['min']}, {v['max']}]")
+        if r["capped"]:
+            print("  -> недостижимость НЕ доказывается: пространство не исчерпано; "
+                  "атрибуты выше — кандидаты на абстракцию по порогам")
         return 0
 
     if a.cmd == "play":

@@ -1,0 +1,643 @@
+{
+  "schema": 1,
+  "title": "Орбитальная станция «Анемон»",
+  "tone": "холодный, процедурный; под процедурой — паника и любовь",
+  "seed": 77,
+  "entities": {
+    "player": {
+      "type": "human",
+      "tags": [
+        "auditor",
+        "earth"
+      ],
+      "attrs": {
+        "hp": 10,
+        "hp_max": 10,
+        "authority": 6,
+        "evidence": 0
+      },
+      "desc": "Аудитор с Земли. Прилетел разобраться в дрейфе. Говорит ровно, пока не сорвётся."
+    },
+    "rein": {
+      "type": "human",
+      "tags": [
+        "engineer",
+        "crew",
+        "witness"
+      ],
+      "attrs": {
+        "hp": 8,
+        "hp_max": 8,
+        "cold": 8,
+        "guilt": 5,
+        "trust": 0
+      },
+      "desc": "Инженер Рейн. Холодная и точная. Знает, что отчёт о неисправности подделан, и что подделали не она."
+    },
+    "yusuf": {
+      "type": "human",
+      "tags": [
+        "pilot",
+        "crew"
+      ],
+      "attrs": {
+        "hp": 9,
+        "hp_max": 9,
+        "fatigue": 8,
+        "love": 7,
+        "trust": 0
+      },
+      "desc": "Пилот Юсуф. Спит в кресле. Любит Рейн и не признался — ни ей, ни себе."
+    },
+    "android7": {
+      "type": "android",
+      "tags": [
+        "service",
+        "witness",
+        "memory"
+      ],
+      "attrs": {
+        "hp": 6,
+        "hp_max": 6,
+        "integrity": 3,
+        "trust": 0
+      },
+      "desc": "Сервисный робот ANDROID-7. Память частично стёрта; в остатке — запись, которая всё меняет."
+    },
+    "capsule": {
+      "type": "vehicle",
+      "tags": [
+        "rescue",
+        "single_seat"
+      ],
+      "attrs": {
+        "seats": 1,
+        "fuel": 4
+      },
+      "desc": "Спасательная капсула. Одно место. Или никто, или один."
+    },
+    "station": {
+      "type": "vessel",
+      "tags": [
+        "orbital",
+        "anemone"
+      ],
+      "attrs": {
+        "orbit": 6,
+        "hull": 5
+      },
+      "desc": "«Анемон». Теряет орбиту. У человечества три часа."
+    },
+    "report": {
+      "type": "document",
+      "tags": [
+        "forged",
+        "evidence"
+      ],
+      "attrs": {
+        "validity": 1
+      },
+      "desc": "Отчёт о неисправности. Подпись Рейн, рука — чужая."
+    },
+    "recording": {
+      "type": "data",
+      "tags": [
+        "memory",
+        "evidence"
+      ],
+      "attrs": {
+        "clarity": 4
+      },
+      "desc": "Фрагмент стёртой памяти ANDROID-7. На нём — рука, правящая отчёт."
+    },
+    "earth": {
+      "type": "faction",
+      "tags": [
+        "home",
+        "control"
+      ],
+      "attrs": {
+        "patience": 3
+      },
+      "desc": "Земля. Слушает каждые шесть часов. Решает — потом."
+    }
+  },
+  "holds": [
+    [
+      "rein",
+      "report"
+    ],
+    [
+      "android7",
+      "recording"
+    ],
+    [
+      "station",
+      "capsule"
+    ]
+  ],
+  "relations": [
+    [
+      "yusuf",
+      "rein",
+      "loves",
+      7
+    ],
+    [
+      "rein",
+      "yusuf",
+      "trusts",
+      2
+    ],
+    [
+      "player",
+      "earth",
+      "reports_to",
+      6
+    ],
+    [
+      "android7",
+      "rein",
+      "serves",
+      3
+    ],
+    [
+      "player",
+      "rein",
+      "trust",
+      0
+    ],
+    [
+      "player",
+      "yusuf",
+      "trust",
+      0
+    ]
+  ],
+  "flags": {
+    "logs_checked": 0,
+    "report_forged": 0,
+    "rein_confessed": 0,
+    "yusuf_confessed": 0,
+    "android_accessible": 0,
+    "recording_recovered": 0,
+    "capsule_busy": 0,
+    "all_stay": 0,
+    "earth_contact": 0,
+    "player_dead": 0
+  },
+  "actions": [
+    {
+      "id": "scan_report",
+      "label": "Сверить отчёт о неисправности с логами",
+      "pre": [],
+      "eff": [
+        [
+          "say",
+          "Процедура первичного аудита. Сверяю отчёт о неисправности с бортовыми логами."
+        ],
+        [
+          "add",
+          "player.evidence",
+          1
+        ],
+        [
+          "flag",
+          "logs_checked",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "talk_rein",
+      "label": "Поговорить с Рейн",
+      "pre": [],
+      "eff": [
+        [
+          "say",
+          "Рейн, инженер. Докладывайте коротко. Где дрейф?"
+        ],
+        [
+          "add",
+          "player.evidence",
+          1
+        ],
+        [
+          "rel",
+          "player",
+          "rein",
+          "trust",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "press_rein",
+      "label": "Предъявить Рейн подлог",
+      "pre": [
+        [
+          "ge",
+          "player.evidence",
+          2
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Отчёт подделан. Подпись ваша. Признавайтесь."
+        ],
+        [
+          "flag",
+          "report_forged",
+          1
+        ],
+        [
+          "add",
+          "rein.guilt",
+          1
+        ],
+        [
+          "rel",
+          "player",
+          "rein",
+          "trust",
+          -1
+        ]
+      ]
+    },
+    {
+      "id": "offer_deal",
+      "label": "Предложить Рейн сделку",
+      "pre": [
+        [
+          "flag",
+          "report_forged"
+        ],
+        [
+          "rel_gt",
+          "player",
+          "rein",
+          "trust",
+          1
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Я могу вытащить вас. Взамен — имя того, кто правил отчёт."
+        ],
+        [
+          "flag",
+          "rein_confessed",
+          1
+        ],
+        [
+          "add",
+          "rein.guilt",
+          1
+        ],
+        [
+          "rel",
+          "player",
+          "rein",
+          "trust",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "talk_yusuf",
+      "label": "Разбудить Юсуфа",
+      "pre": [],
+      "eff": [
+        [
+          "say",
+          "Юсуф. Пилот. Спите в кресле вместо вахты?"
+        ],
+        [
+          "add",
+          "yusuf.love",
+          1
+        ],
+        [
+          "rel",
+          "player",
+          "yusuf",
+          "trust",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "ask_yusuf_feelings",
+      "label": "Спросить Юсуфа о Рейн",
+      "pre": [
+        [
+          "rel_gt",
+          "yusuf",
+          "rein",
+          "loves",
+          5
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Вы любите её. Это не протокол, но это тоже данные."
+        ],
+        [
+          "flag",
+          "yusuf_confessed",
+          1
+        ],
+        [
+          "add",
+          "yusuf.love",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "query_android7",
+      "label": "Подключиться к ANDROID-7",
+      "pre": [],
+      "eff": [
+        [
+          "say",
+          "ANDROID-7. Диагностика памяти. Что осталось от последнего цикла?"
+        ],
+        [
+          "flag",
+          "android_accessible",
+          1
+        ],
+        [
+          "add",
+          "android7.integrity",
+          -1
+        ]
+      ]
+    },
+    {
+      "id": "recover_recording",
+      "label": "Восстановить стёртую запись",
+      "pre": [
+        [
+          "flag",
+          "android_accessible"
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Фрагмент восстановлен. На записи — рука, правящая отчёт."
+        ],
+        [
+          "take",
+          "android7",
+          "recording"
+        ],
+        [
+          "give",
+          "player",
+          "recording"
+        ],
+        [
+          "flag",
+          "recording_recovered",
+          1
+        ],
+        [
+          "add",
+          "android7.integrity",
+          -2
+        ]
+      ]
+    },
+    {
+      "id": "transmit_to_earth",
+      "label": "Передать запись на Землю",
+      "pre": [
+        [
+          "has",
+          "player",
+          "recording"
+        ],
+        [
+          "ge",
+          "station.orbit",
+          1
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Сеанс связи. Шесть часов сжаты в шесть секунд. Передаю на Землю."
+        ],
+        [
+          "flag",
+          "earth_contact",
+          1
+        ],
+        [
+          "add",
+          "player.evidence",
+          2
+        ],
+        [
+          "end",
+          "правда_наружу"
+        ]
+      ]
+    },
+    {
+      "id": "launch_rein",
+      "label": "Посадить Рейн в капсулу",
+      "pre": [
+        [
+          "flag",
+          "rein_confessed"
+        ],
+        [
+          "eq",
+          "capsule.seats",
+          1
+        ],
+        [
+          "not",
+          [
+            "flag",
+            "capsule_busy"
+          ]
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Капсула принимает одного. Рейн, вы летите. Имя подлога — с вами."
+        ],
+        [
+          "flag",
+          "capsule_busy",
+          1
+        ],
+        [
+          "rel",
+          "rein",
+          "yusuf",
+          "trust",
+          -2
+        ],
+        [
+          "end",
+          "капсула_рейна"
+        ]
+      ]
+    },
+    {
+      "id": "yusuf_yields",
+      "label": "Принять предложение Юсуфа",
+      "pre": [
+        [
+          "flag",
+          "rein_confessed"
+        ],
+        [
+          "rel_gt",
+          "yusuf",
+          "rein",
+          "loves",
+          6
+        ],
+        [
+          "not",
+          [
+            "flag",
+            "capsule_busy"
+          ]
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Юсуф, ваше место занято. Вы остаётесь. Это не приказ — это согласие."
+        ],
+        [
+          "flag",
+          "capsule_busy",
+          1
+        ],
+        [
+          "add",
+          "yusuf.love",
+          1
+        ],
+        [
+          "end",
+          "юсуф"
+        ]
+      ]
+    },
+    {
+      "id": "order_all_stay",
+      "label": "Запретить запуск капсулы",
+      "pre": [
+        [
+          "not",
+          [
+            "flag",
+            "capsule_busy"
+          ]
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Капсула не запускается. Никто не летит. Все остаются на «Анемоне»."
+        ],
+        [
+          "flag",
+          "all_stay",
+          1
+        ],
+        [
+          "end",
+          "все_остаются"
+        ]
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "pre": [
+        [
+          "le",
+          "player.hp",
+          0
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Пульс аудитора ровный. Потом — ровнее некуда. Земля не узнает."
+        ],
+        [
+          "flag",
+          "player_dead",
+          1
+        ]
+      ],
+      "once": true
+    },
+    {
+      "pre": [
+        [
+          "flag",
+          "all_stay"
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Орбита проседает. Три часа истекли. «Анемон» идёт вниз вместе со всеми."
+        ],
+        [
+          "add",
+          "station.orbit",
+          -2
+        ]
+      ],
+      "once": true
+    },
+    {
+      "pre": [
+        [
+          "flag",
+          "report_forged"
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Подлог вскрыт. Экипаж знает, что аудитор знает. Тишина стала плотнее."
+        ],
+        [
+          "rel",
+          "rein",
+          "player",
+          "trust",
+          -1
+        ]
+      ],
+      "once": true
+    }
+  ],
+  "constraints": {
+    "vital": [
+      "rein",
+      "yusuf",
+      "android7"
+    ],
+    "min_hp": 1
+  }
+}

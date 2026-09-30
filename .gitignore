@@ -1,0 +1,19 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# runtime artifacts
+.sintgame/
+*.ext.json
+prose_cache.json
+intent_cache.json
+save.json
+
+# research prototypes (не часть репозитория)
+spike/
+spike2/

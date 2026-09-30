@@ -33,13 +33,17 @@ def soak(data, turns=60, policy="explore", seed=0, check_constraints=True, max_e
     vital, min_hp = cons.get("vital", []), cons.get("min_hp", 1)
     all_ids = {a["id"] for a in data.get("actions", [])}
     total, episodes = 0, 0
+    stuck = 0
     endings, violations = {}, []
+    episode_lengths = []
     used_union = set()
     while total < turns and episodes < max_episodes:
         w = World(copy.deepcopy(data), seed=seed + episodes)
         rng = random.Random(seed + episodes)
         used = set()
-        for t in range(turns - total):
+        ep_len = 0
+        budget = turns - total
+        for t in range(budget):
             if w.ended:
                 break
             acts = w.available()
@@ -50,6 +54,7 @@ def soak(data, turns=60, policy="explore", seed=0, check_constraints=True, max_e
             used.add(a["id"])
             w.act(a["id"])
             total += 1
+            ep_len += 1
             if w.hit_guard:
                 violations.append(f"ep{episodes} turn{t}: нестабильный каскад триггеров")
             if check_constraints and not w.ended:
@@ -57,14 +62,20 @@ def soak(data, turns=60, policy="explore", seed=0, check_constraints=True, max_e
                     if w.get(f"{v}.hp") < min_hp:
                         violations.append(f"ep{episodes} turn{t}: vital '{v}' ниже min_hp")
         episodes += 1
+        episode_lengths.append(ep_len)
         used_union |= used
         if w.ended:
             endings[w.ended] = endings.get(w.ended, 0) + 1
-        elif total < turns:
-            break  # мир не завершился и ходы кончились — дальше смысла нет
+        else:
+            # залипание: отработал ВЕСЬ бюджет ходов и не пришёл к концовке
+            if ep_len == budget and ep_len >= 20:
+                stuck += 1
+            break
     return {"turns": total, "episodes": episodes, "endings": endings,
             "violations": violations, "unused_actions": sorted(all_ids - used_union),
-            "policy": policy, "seed": seed}
+            "episode_lengths": episode_lengths,
+            "max_episode": max(episode_lengths) if episode_lengths else 0,
+            "stuck_episodes": stuck, "policy": policy, "seed": seed}
 
 
 def report(data, turns=60, policy="explore", seed=0):
@@ -72,8 +83,12 @@ def report(data, turns=60, policy="explore", seed=0):
     lines = [f"soak: {r['turns']} turns across {r['episodes']} episodes "
              f"(policy={r['policy']}, seed={r['seed']})",
              f"  endings: {r['endings'] or '—'}",
+             f"  max single episode: {r['max_episode']} turns (эпизоды: {r['episode_lengths']})",
              f"  violations: {len(r['violations'])}"]
     for v in r["violations"][:10]:
         lines.append(f"    ! {v}")
+    if r["stuck_episodes"]:
+        lines.append(f"  ⚠ {r['stuck_episodes']} эпизод(ов) упёрлись в лимит ходов без концовки "
+                     f"(политика залипла / концовка недостижима для неё) — длинный прогон НЕ засчитан")
     lines.append(f"  unused actions: {r['unused_actions']}")
     return "\n".join(lines), r

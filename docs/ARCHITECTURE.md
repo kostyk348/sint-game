@@ -87,7 +87,8 @@ sintgame/prompt.py         сборка промптов со стабильны
 sintgame/gen.py            адаптер LLM (SINT_GEN_CMD)
 sintgame/intent.py         свободный текст → интент → ворота
 sintgame/compile_world.py  лор → мир
-sintgame/play.py           рантайм-луп
+sintgame/content.py        генерация контента (NPC/предмет/локация/квест) под верификацией
+sintgame/play.py           рантайм-луп (контекстная проза: история + описания сущностей)
 sintgame/cache.py          каталог кэшей (.sintgame/)
 sintgame/cli.py            единая точка входа
 ```

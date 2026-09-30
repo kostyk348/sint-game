@@ -56,6 +56,29 @@ sintgame play my_world.json --state-out save.json
 sintgame play my_world.json --state-in save.json
 ```
 
+## Создание контента (расширение готового мира)
+
+Когда мир уже есть, контент добавляется против **замороженного скелета** — с проверкой,
+что игра не ломается:
+
+```bash
+sintgame add my_world.json --kind npc      -n 3 -o my_world.json
+sintgame add my_world.json --kind item     -n 5 -o my_world.json
+sintgame add my_world.json --kind location -n 2 -o my_world.json
+sintgame add my_world.json --kind quest           -o my_world.json
+```
+
+Каждое дополнение проходит **верификацию**:
+
+1. схема валидна;
+2. нет мёртвых предпосылок (флаг требуется, но нигде не выставляется; предмет требуется,
+   но ниоткуда не берётся);
+3. все объявленные **концовки по-прежнему достижимы**.
+
+Если проверка не прошла — дополнение откатывается, а LLM переделывает его с подсказкой
+об ошибках (до `--rounds`). Это «шина контрактов»: контент генерят частями, но мир
+остаётся связным.
+
 ## Крутить механики
 
 Всё — в `world.json`. Можно править руками:

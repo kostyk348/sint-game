@@ -9,6 +9,7 @@ import json
 
 from . import __version__
 from .compile_world import compile_world
+from .content import KINDS, add_content
 from .play import play
 from .schema import simulate, validate
 from .search import report as reach_report
@@ -32,12 +33,19 @@ def main(argv=None):
     p.add_argument("world")
     p.add_argument("--trials", type=int, default=2000)
 
+    p = sub.add_parser("add", help="сгенерировать контент в мир (npc/item/location/quest) под верификацией")
+    p.add_argument("world")
+    p.add_argument("--kind", choices=list(KINDS), required=True)
+    p.add_argument("-n", type=int, default=1)
+    p.add_argument("-o", "--out", default="")
+
     p = sub.add_parser("play", help="запустить мир детерминированно")
     p.add_argument("world")
     p.add_argument("--script", default="", help="список action id через запятую")
     p.add_argument("--free", default="", help="свободный ввод игрока (агент-интент + ворота)")
     p.add_argument("--prose", choices=["llm", "none"], default="llm")
     p.add_argument("--variety", action="store_true", help="live-режим: без кэша прозы")
+    p.add_argument("--context", type=int, default=4, help="сколько недавних событий давать в прозу (0 = выкл)")
     p.add_argument("--state-in", default=None, help="восстановить состояние (вкл. rng)")
     p.add_argument("--state-out", default=None, help="сохранить состояние (вкл. rng)")
 
@@ -77,9 +85,22 @@ def main(argv=None):
             print("  WARNING: доминирующая концовка (>70%) — вероятный дисбаланс")
         return 0
 
+    if a.cmd == "add":
+        d = json.load(open(a.world))
+        w2, info = add_content(d, a.kind, a.n)
+        if not w2:
+            print("ADD FAILED:")
+            for x in info:
+                print("  -", x)
+            return 1
+        out = a.out or a.world
+        json.dump(w2, open(out, "w"), ensure_ascii=False, indent=2)
+        print(f"ADDED -> {out}: " + "; ".join(info))
+        return 0
+
     if a.cmd == "play":
         play(a.world, [s.strip() for s in a.script.split(",") if s.strip()],
-             a.free, a.prose == "llm", a.variety, a.state_in, a.state_out)
+             a.free, a.prose == "llm", a.variety, a.state_in, a.state_out, a.context)
         return 0
 
     return 0

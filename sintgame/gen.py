@@ -20,7 +20,11 @@ def call(prompt, cmd=None, timeout=None, cwd=None):
     timeout = timeout or int(os.environ.get("SINT_GEN_TIMEOUT", "180"))
     cwd = cwd or os.environ.get("SINT_GEN_CWD", "/tmp")
     args = shlex.split(cmd) + [prompt]
-    p = subprocess.run(args, capture_output=True, text=True, timeout=timeout, cwd=cwd)
+    try:
+        p = subprocess.run(args, capture_output=True, text=True, timeout=timeout, cwd=cwd)
+    except (FileNotFoundError, subprocess.TimeoutExpired, OSError):
+        # нет LLM / нет команды / таймаут -> пустой ответ; вызывающий код деградирует штатно
+        return ""
     return (p.stdout or "") + (("\n" + p.stderr) if p.returncode else "")
 
 

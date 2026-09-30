@@ -54,8 +54,20 @@ def load_cache():
         return {}
 
 
-def gen_prose(world, tone, label, said, d, cache, use_llm, variety=False, monitor=None):
-    key = hashlib.sha1((tone + "|" + label + "|" + "|".join(said) + "|" + "|".join(d)).encode()).hexdigest()[:16]
+def _mentioned(world, said, d):
+    text = " ".join(said) + " " + " ".join(d)
+    out = {}
+    for i, e in world.get("entities", {}).items():
+        if i in text and e.get("desc"):
+            out[i] = e["desc"]
+    return out
+
+
+def gen_prose(world, tone, label, said, d, cache, use_llm, variety=False, monitor=None, history=None):
+    descs = _mentioned(world, said, d)
+    hist = " | ".join((history or [])[-4:])
+    key = hashlib.sha1(("|".join([tone, label, "|".join(said), "|".join(d), hist,
+                                  json.dumps(descs, ensure_ascii=False, sort_keys=True)])).encode()).hexdigest()[:16]
     if not variety and key in cache:
         return cache[key], "(cached)"
     if not use_llm:
@@ -67,10 +79,15 @@ def gen_prose(world, tone, label, said, d, cache, use_llm, variety=False, monito
     prefix = P.world_bible(world)
     if monitor:
         monitor.note(prefix)
+    ctx = ""
+    if hist:
+        ctx += f"\nНедавние события (для связности): {hist}"
+    if descs:
+        ctx += f"\nОписания упомянутых сущностей: {json.dumps(descs, ensure_ascii=False)}"
     suffix = (f"ЗАДАЧА: напиши прозу. Действие: {label}\n"
               f"Факты (не меняй, не добавляй новых): {said}\n"
-              f"Дельта состояния: {d}\n"
-              "1-3 предложения атмосферной прозы от второго лица. Только текст." + salt)
+              f"Дельта состояния: {d}{ctx}\n"
+              "1-3 предложения от второго лица, СВЯЗНО с недавними событиями. Только текст." + salt)
     txt = gen_text(P.build(prefix, suffix))
     if not variety:
         cache[key] = txt
@@ -78,7 +95,7 @@ def gen_prose(world, tone, label, said, d, cache, use_llm, variety=False, monito
     return txt, ("(agent-live)" if variety else "(agent)")
 
 
-def play(world_path, script, free, use_prose, variety=False, state_in=None, state_out=None):
+def play(world_path, script, free, use_prose, variety=False, state_in=None, state_out=None, context_n=4):
     world = load_world(world_path)
     w = World(world)
     if state_in:
@@ -89,6 +106,7 @@ def play(world_path, script, free, use_prose, variety=False, state_in=None, stat
     tone = world.get("tone", "neutral")
     print(f"== {world.get('title')} | tone={tone} | seed={world.get('seed')} ==")
     turns = list(script)
+    history = []
 
     while not w.ended:
         label = aid = None
@@ -129,9 +147,11 @@ def play(world_path, script, free, use_prose, variety=False, state_in=None, stat
             print("  " + s)
         if d:
             print("  [" + "; ".join(d) + "]")
-        txt, src = gen_prose(world, tone, label, said, d, cache, use_prose, variety, monitor)
+        txt, src = gen_prose(world, tone, label, said, d, cache, use_prose, variety, monitor,
+                             history=(history[-context_n:] if context_n else []))
         if txt:
             print(f"  · {txt}  {src}")
+        history.append(label)
 
     print("\n== END:", w.ended or "-", "|", w.status())
     print("  " + monitor.report())

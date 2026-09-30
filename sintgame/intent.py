@@ -12,6 +12,7 @@
 """
 import hashlib
 import json
+import re
 
 from . import prompt as P
 from .cache import path as _cache_path
@@ -46,7 +47,30 @@ def parse_intent(free, world, w):
         "known_action — только при точном совпадении смысла. Только JSON."
     )
     obj, _ = gen_json(P.build(P.world_bible(world), suffix))
-    return obj or {}
+    # оффлайн-фолбэк: без LLM всё равно пробуем сопоставить текст с действиями
+    return obj or {"verb": free, "target": None, "manner": "", "known_action": None}
+
+
+def _tokens(s):
+    return set(re.findall(r"[0-9a-zA-Zа-яА-ЯёЁ_]+", (s or "").lower()))
+
+
+def match_existing(world, free, intent, w):
+    """Семантическое сопоставление с УЖЕ существующими действиями (включая admitted).
+
+    Не даёт плодить дубли (`hug_iya`, `hug_iya_comfort`, `embrace`) и даёт работу без LLM.
+    """
+    q = (_tokens(free) | _tokens(intent.get("verb")) | _tokens(intent.get("manner"))
+         | _tokens(intent.get("target")))
+    best, bs = None, 0.0
+    for a in w.d.get("actions", []):
+        at = _tokens(a.get("label")) | _tokens(a.get("id"))
+        if not at:
+            continue
+        sc = len(q & at) / len(at)
+        if sc > bs:
+            best, bs = a["id"], sc
+    return best if bs >= 0.5 else None
 
 
 def resolve(intent, w):
@@ -146,10 +170,14 @@ def pipeline(free, world, w):
 
     intent = parse_intent(free, world, w)
     aid = resolve(intent, w)
+    how = "resolved"
+    if not aid:
+        aid = match_existing(world, free, intent, w)
+        how = "matched-existing"
     if aid:
-        cache[key] = {"action_id": aid, "how": "resolved", "intent": intent}
+        cache[key] = {"action_id": aid, "how": how, "intent": intent}
         _save(INTENT_CACHE, cache)
-        return aid, "resolved", None
+        return aid, how, None
 
     cand = propose_action(free, intent, world, w)
     if not isinstance(cand, dict):

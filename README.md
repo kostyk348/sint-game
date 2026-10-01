@@ -64,6 +64,9 @@ sintgame compile examples/lighthouse/lore.md -o my_world.json
 # сгенерировать контент в мир (NPC/предмет/локация/квест) под верификацией:
 sintgame add examples/lighthouse/world.json --kind npc -n 2 -o enriched.json
 
+# локальный веб-чат с персонажами (аналог character.ai, но на ноуте) — открыть в браузере:
+sintgame serve --port 8000        # → http://127.0.0.1:8000
+
 # инструменты автора:
 sintgame editor examples/lighthouse/world.json -o editor.html   # HTML-редактор + граф
 sintgame balance examples/lighthouse/world.json --trials 3000  # распределение концовок
@@ -81,7 +84,7 @@ SINT_GEN_CMD="opencode run --pure" \
   --free "обнять Ию, она плачет"
 ```
 
-Тесты: `make test` (или `python -m pytest -q`) — 45 тестов, без сети.
+Тесты: `make test` (или `python -m pytest -q`) — 48 тестов, без сети.
 
 ## 4. Что уже работает
 
@@ -115,6 +118,9 @@ SINT_GEN_CMD="opencode run --pure" \
   который добавляет события прямо в рантайме под воротами (механика в духе Pax Historia).
 - **Валидатор стабильности**: ловит петли триггеров (каскад упирается в guard) — иначе
   компилятор мог собрать мир, ломающийся на первом же ходу.
+- **Локальный веб-чат** (`sintgame serve`): персонажный чат в браузере на stdlib HTTP —
+  персонажи берутся из NPC миров (`voice`/`desc`), есть память диалога, ответы в роли.
+  Локально, без облака.
 - **Детерминированный реплей** + режим `--variety` (живость вместо копий).
 - **Сохранение состояния** целиком, **включая `rng`** (иначе сейв/лоад рассинхронится).
 - **Дисциплина prompt-кэша**: стабильный префикс, чтобы кэш нейронки не ломался.

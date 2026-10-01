@@ -15,6 +15,7 @@ from .editor import write_editor
 from .play import play
 from .run import report as soak_report
 from .sandbox import director_llm, report as sandbox_report
+from .serve import run as serve_run
 from .schema import simulate, validate
 from .search import diagnose, report as reach_report
 from .tune import tune
@@ -77,6 +78,12 @@ def main(argv=None):
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--every", type=int, default=0, help="каждые N ходов звать директора (0 = выкл)")
     p.add_argument("--director", choices=["none", "llm"], default="none")
+
+    p = sub.add_parser("serve", help="локальный веб-чат с персонажами (аналог character.ai, на ноуте)")
+    p.add_argument("--host", default="127.0.0.1")
+    p.add_argument("--port", type=int, default=8000)
+    p.add_argument("--characters", default="", help="каталог JSON-карточек персонажей")
+    p.add_argument("--world", action="append", default=[], help="world.json (NPC → персонажи); можно несколько")
 
     p = sub.add_parser("play", help="запустить мир детерминированно")
     p.add_argument("world")
@@ -183,6 +190,11 @@ def main(argv=None):
                                  director=director, every=a.every)
         print(text)
         return 0 if not r["violations"] else 2
+
+    if a.cmd == "serve":
+        serve_run(host=a.host, port=a.port, worlds=a.world or None,
+                  character_dir=a.characters or None)
+        return 0
 
     if a.cmd == "play":
         play(a.world, [s.strip() for s in a.script.split(",") if s.strip()],

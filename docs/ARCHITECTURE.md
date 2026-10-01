@@ -94,6 +94,8 @@ sintgame/editor.py         HTML-редактор мира (граф + свиде
 sintgame/tune.py           авто-тюнинг числовых параметров под баланс (hill-climb)
 sintgame/run.py            многоэпизодный прогон N ходов с проверкой инвариантов
 sintgame/sandbox.py        открытый режим: 500+ ходов без финала + директор (рост контента)
+sintgame/chat.py           персонажный чат (персона + память + стабильный префикс)
+sintgame/serve.py          локальный веб-чат (stdlib HTTP + встроенный HTML)
 sintgame/play.py           рантайм-луп (контекстная проза: история + факты + описания)
 sintgame/cache.py          каталог кэшей (.sintgame/)
 sintgame/cli.py            единая точка входа

@@ -11,7 +11,7 @@ import random
 
 from .kernel import World
 
-POLICIES = ("random", "explore", "greedy")
+POLICIES = ("random", "explore", "greedy", "linger")
 
 
 def _choose(policy, acts, rng, used):
@@ -20,6 +20,12 @@ def _choose(policy, acts, rng, used):
     if policy == "explore":
         fresh = [a for a in acts if a["id"] not in used]
         return rng.choice(fresh or acts)
+    if policy == "linger":
+        # долгая игра: не выбираем действия, создающие концовку (эмулирует «жить, а не финишировать»)
+        safe = [a for a in acts if not any(e and e[0] == "end" for e in a.get("eff", []))]
+        pool = safe or acts
+        fresh = [a for a in pool if a["id"] not in used]
+        return rng.choice(fresh or pool)
 
     def weight(a):
         return sum(1 for e in a.get("eff", []) if e and e[0] != "say")
@@ -67,8 +73,8 @@ def soak(data, turns=60, policy="explore", seed=0, check_constraints=True, max_e
         if w.ended:
             endings[w.ended] = endings.get(w.ended, 0) + 1
         else:
-            # залипание: отработал ВЕСЬ бюджет ходов и не пришёл к концовке
-            if ep_len == budget and ep_len >= 20:
+            # залипание = топтание на месте: отработал весь бюджет, но мало РАЗНЫХ действий
+            if ep_len == budget and ep_len >= 20 and len(used) <= max(2, len(all_ids) // 5):
                 stuck += 1
             break
     return {"turns": total, "episodes": episodes, "endings": endings,

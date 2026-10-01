@@ -14,6 +14,7 @@ from .content import KINDS, add_content
 from .editor import write_editor
 from .play import play
 from .run import report as soak_report
+from .sandbox import director_llm, report as sandbox_report
 from .schema import simulate, validate
 from .search import diagnose, report as reach_report
 from .tune import tune
@@ -28,6 +29,7 @@ def main(argv=None):
     p.add_argument("lore")
     p.add_argument("-o", "--out", default="world.json")
     p.add_argument("--rounds", type=int, default=3)
+    p.add_argument("--sandbox", action="store_true", help="открытый мир без обязательных концовок")
 
     p = sub.add_parser("validate", help="схема + инварианты + достижимость (BFS со свидетелями)")
     p.add_argument("world")
@@ -58,7 +60,7 @@ def main(argv=None):
     p = sub.add_parser("run", help="полноценный прогон N ходов с проверкой инвариантов")
     p.add_argument("world")
     p.add_argument("--turns", type=int, default=60)
-    p.add_argument("--policy", choices=["random", "explore", "greedy"], default="explore")
+    p.add_argument("--policy", choices=["random", "explore", "greedy", "linger"], default="explore")
     p.add_argument("--seed", type=int, default=0)
 
     p = sub.add_parser("tune", help="авто-тюнинг чисел мира под баланс концовок")
@@ -67,6 +69,14 @@ def main(argv=None):
     p.add_argument("--trials", type=int, default=300)
     p.add_argument("--iters", type=int, default=80)
     p.add_argument("--seed", type=int, default=0)
+
+    p = sub.add_parser("sandbox", help="открытый песочный режим: долгие прогоны (500+ шагов) + директор")
+    p.add_argument("world")
+    p.add_argument("--turns", type=int, default=500)
+    p.add_argument("--policy", choices=["random", "explore", "greedy", "linger"], default="linger")
+    p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--every", type=int, default=0, help="каждые N ходов звать директора (0 = выкл)")
+    p.add_argument("--director", choices=["none", "llm"], default="none")
 
     p = sub.add_parser("play", help="запустить мир детерминированно")
     p.add_argument("world")
@@ -81,7 +91,7 @@ def main(argv=None):
     a = ap.parse_args(argv)
 
     if a.cmd == "compile":
-        world, sim = compile_world(open(a.lore).read(), a.rounds)
+        world, sim = compile_world(open(a.lore).read(), a.rounds, sandbox=a.sandbox)
         if not world:
             print("COMPILE FAILED")
             return 1
@@ -165,6 +175,14 @@ def main(argv=None):
             print("  -> недостижимость НЕ доказывается: пространство не исчерпано; "
                   "атрибуты выше — кандидаты на абстракцию по порогам")
         return 0
+
+    if a.cmd == "sandbox":
+        d = json.load(open(a.world))
+        director = director_llm if (a.director == "llm" and a.every) else None
+        text, r = sandbox_report(d, turns=a.turns, policy=a.policy, seed=a.seed,
+                                 director=director, every=a.every)
+        print(text)
+        return 0 if not r["violations"] else 2
 
     if a.cmd == "play":
         play(a.world, [s.strip() for s in a.script.split(",") if s.strip()],

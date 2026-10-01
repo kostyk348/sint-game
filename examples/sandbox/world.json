@@ -1,0 +1,1587 @@
+{
+  "schema": 1,
+  "title": "Уэллс на краю пустыни",
+  "tone": "жара, пыль, терпение, редкая тень",
+  "seed": 193704,
+  "entities": {
+    "player": {
+      "type": "person",
+      "tags": [
+        "вольный",
+        "работник",
+        "сезонник"
+      ],
+      "attrs": {
+        "hp": 10,
+        "hp_max": 10,
+        "thirst": 4,
+        "fatigue": 2,
+        "water": 3,
+        "money": 12,
+        "rep": 0,
+        "trust_aziz": 0,
+        "trust_voron": 0,
+        "relation_mira": 0,
+        "donkey_wear": 0,
+        "debt": 0,
+        "skill_trade": 1
+      },
+      "desc": "Вольный работник без хозяина. Нанялся на сезон и остался на краю песка.",
+      "voice": "Держи спину ровно, воду — ближе. Здесь никто не подаст."
+    },
+    "aziz": {
+      "type": "person",
+      "tags": [
+        "хозяин",
+        "колодец",
+        "долги"
+      ],
+      "attrs": {
+        "hp": 10,
+        "hp_max": 10,
+        "price": 4,
+        "mood": 0,
+        "flow": 3
+      },
+      "desc": "Хозяин колодца. Вода дороже золота; у него своя цена и свои долги.",
+      "voice": "Пей. Платить будешь потом, как все."
+    },
+    "voron": {
+      "type": "person",
+      "tags": [
+        "стражник",
+        "порядок",
+        "доля"
+      ],
+      "attrs": {
+        "hp": 12,
+        "hp_max": 12,
+        "share": 3,
+        "mood": 0
+      },
+      "desc": "Стражник Уэллса. Берёт долю, любит порядок, не любит вольных.",
+      "voice": "Порядок — это когда каждый знает своё место. Даже ты."
+    },
+    "mira": {
+      "type": "person",
+      "tags": [
+        "травница",
+        "снадобья",
+        "слухи"
+      ],
+      "attrs": {
+        "hp": 8,
+        "hp_max": 8,
+        "stock": 5,
+        "price": 3,
+        "mood": 0
+      },
+      "desc": "Травница. Торгует снадобьями и знает всё про всех.",
+      "voice": "Раны затянутся. Слухи — тоже, если их вовремя подкормить."
+    },
+    "vodonos": {
+      "type": "person",
+      "tags": [
+        "мальчишка",
+        "водонос",
+        "вороватый"
+      ],
+      "attrs": {
+        "hp": 6,
+        "hp_max": 6,
+        "speed": 8,
+        "trust": 0
+      },
+      "desc": "Мальчишка-водонос. Быстрый, вороватый, полезный.",
+      "voice": "Тише воды. Воды-то как раз и нет — но я найду."
+    },
+    "karavan": {
+      "type": "person",
+      "tags": [
+        "караванщик",
+        "слухи",
+        "товар"
+      ],
+      "attrs": {
+        "hp": 10,
+        "hp_max": 10,
+        "goods": 6,
+        "distance": 3
+      },
+      "desc": "Караванщик, что приходит и уходит. С ним слухи, товар и работа.",
+      "voice": "Три дня пути в любую сторону. Здесь и вода, и молва."
+    },
+    "desert": {
+      "type": "force",
+      "tags": [
+        "пустыня",
+        "зной",
+        "суховей",
+        "ночь"
+      ],
+      "attrs": {
+        "heat": 8,
+        "wind": 5
+      },
+      "desc": "Пустыня. Пыль, зной, суховеи, ночи; опасна, но кормит.",
+      "voice": "Я не убиваю. Я просто жду, пока ты устанешь."
+    },
+    "well": {
+      "type": "place",
+      "tags": [
+        "колодец",
+        "вода",
+        "дорога"
+      ],
+      "attrs": {
+        "depth": 6,
+        "flow": 3
+      },
+      "desc": "Единственная вода на три дня пути. Кто держит колодец — держит дорогу.",
+      "voice": "Тихий скрип ворота. Ведро. Дно. Ещё ведро."
+    },
+    "water_skin": {
+      "type": "item",
+      "tags": [
+        "снаряжение",
+        "вода"
+      ],
+      "attrs": {
+        "capacity": 5,
+        "condition": 8
+      },
+      "desc": "Бурдюк из козьей кожи. Пахнет дымом и немного течёт по шву.",
+      "voice": ""
+    },
+    "salt": {
+      "type": "item",
+      "tags": [
+        "товар",
+        "соль"
+      ],
+      "attrs": {
+        "amount": 10,
+        "value": 20
+      },
+      "desc": "Плотный тюк соли. Тот самый караван пропал не просто так — соль дороже крови.",
+      "voice": ""
+    },
+    "medicine": {
+      "type": "item",
+      "tags": [
+        "снадобье",
+        "лекарство"
+      ],
+      "attrs": {
+        "amount": 4,
+        "potency": 4
+      },
+      "desc": "Склянка мутной настойки. Горько, зато поднимает на ноги.",
+      "voice": ""
+    },
+    "herbs": {
+      "type": "item",
+      "tags": [
+        "снадобье",
+        "сбор"
+      ],
+      "attrs": {
+        "amount": 4,
+        "potency": 2
+      },
+      "desc": "Пучок сушёных трав. Пахнет полынью и дальней дорогой.",
+      "voice": ""
+    },
+    "tools": {
+      "type": "item",
+      "tags": [
+        "снаряжение",
+        "ремонт"
+      ],
+      "attrs": {
+        "quality": 6
+      },
+      "desc": "Латаный набор: шило, ремень, гвозди, кусок кожи. Ремонтирует всё, кроме судьбы.",
+      "voice": ""
+    },
+    "cart": {
+      "type": "item",
+      "tags": [
+        "повозка",
+        "тягло"
+      ],
+      "attrs": {
+        "frame": 4,
+        "wheels": 2
+      },
+      "desc": "Скрипучая телега. Держится на честном слове и свежих гвоздях.",
+      "voice": ""
+    },
+    "cloak": {
+      "type": "item",
+      "tags": [
+        "одежда",
+        "защита"
+      ],
+      "attrs": {
+        "condition": 4
+      },
+      "desc": "Пыльный плащ. От солнца прячет, от ветра — наполовину.",
+      "voice": ""
+    },
+    "donkey": {
+      "type": "creature",
+      "tags": [
+        "осёл",
+        "тягло",
+        "износ"
+      ],
+      "attrs": {
+        "hp": 8,
+        "hp_max": 8,
+        "wear": 0,
+        "carry": 6
+      },
+      "desc": "Старый осёл. Тянет, пока тягло цело и хозяин терпелив.",
+      "voice": "И-а. И-а. Ещё немного пыли — и я лягу."
+    }
+  },
+  "holds": [
+    [
+      "player",
+      "water_skin"
+    ],
+    [
+      "player",
+      "tools"
+    ],
+    [
+      "player",
+      "cart"
+    ],
+    [
+      "player",
+      "cloak"
+    ],
+    [
+      "player",
+      "donkey"
+    ],
+    [
+      "aziz",
+      "well"
+    ],
+    [
+      "mira",
+      "medicine"
+    ],
+    [
+      "mira",
+      "herbs"
+    ],
+    [
+      "karavan",
+      "salt"
+    ]
+  ],
+  "relations": [
+    [
+      "player",
+      "aziz",
+      "trust",
+      0
+    ],
+    [
+      "player",
+      "voron",
+      "trust",
+      0
+    ],
+    [
+      "player",
+      "mira",
+      "relation",
+      0
+    ],
+    [
+      "player",
+      "vodonos",
+      "trust",
+      0
+    ],
+    [
+      "aziz",
+      "player",
+      "debt",
+      0
+    ],
+    [
+      "voron",
+      "player",
+      "share",
+      0
+    ]
+  ],
+  "flags": {
+    "caravan_missing": 1,
+    "salt_rumor": 0,
+    "found_tracks": 0,
+    "stole_water": 0,
+    "well_locked": 0,
+    "night": 0,
+    "debt_marked": 0,
+    "cart_broken": 0,
+    "mira_owes": 0
+  },
+  "actions": [
+    {
+      "id": "drink",
+      "label": "Выпить воды",
+      "pre": [
+        [
+          "gt",
+          "player.water",
+          0
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.water",
+          -1
+        ],
+        [
+          "add",
+          "player.thirst",
+          -3
+        ],
+        [
+          "heal",
+          "player",
+          2
+        ],
+        [
+          "say",
+          "Вода тёплая, но живая. Горло отпустило."
+        ]
+      ]
+    },
+    {
+      "id": "buy_water",
+      "label": "Купить воду у Азиза",
+      "pre": [
+        [
+          "ge",
+          "player.money",
+          4
+        ],
+        [
+          "gt",
+          "aziz.flow",
+          0
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.money",
+          -4
+        ],
+        [
+          "add",
+          "player.water",
+          3
+        ],
+        [
+          "add",
+          "player.trust_aziz",
+          1
+        ],
+        [
+          "say",
+          "Азиз цедит: — Вода нынче по цене крови. Но ты платишь — ты пьёшь."
+        ]
+      ]
+    },
+    {
+      "id": "work_carry",
+      "label": "Таскать мешки от колодца",
+      "pre": [
+        [
+          "le",
+          "player.fatigue",
+          6
+        ],
+        [
+          "gt",
+          "player.hp",
+          1
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.money",
+          5
+        ],
+        [
+          "add",
+          "player.fatigue",
+          2
+        ],
+        [
+          "add",
+          "player.thirst",
+          1
+        ],
+        [
+          "add",
+          "player.trust_aziz",
+          1
+        ],
+        [
+          "say",
+          "Пыль осела на плечах серой коркой. Зато звенит в кармане."
+        ]
+      ]
+    },
+    {
+      "id": "work_well",
+      "label": "Помочь Азизу у колодца",
+      "pre": [
+        [
+          "le",
+          "player.fatigue",
+          6
+        ],
+        [
+          "ge",
+          "player.trust_aziz",
+          1
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.trust_aziz",
+          1
+        ],
+        [
+          "add",
+          "player.fatigue",
+          2
+        ],
+        [
+          "set",
+          "well.flow",
+          4
+        ],
+        [
+          "add",
+          "player.money",
+          2
+        ],
+        [
+          "say",
+          "Ворот скрипит, вода идёт ровнее. Азиз кивает — уже что-то."
+        ]
+      ]
+    },
+    {
+      "id": "sleep",
+      "label": "Поспать в тени",
+      "pre": [],
+      "eff": [
+        [
+          "set",
+          "player.fatigue",
+          0
+        ],
+        [
+          "add",
+          "player.thirst",
+          1
+        ],
+        [
+          "heal",
+          "player",
+          1
+        ],
+        [
+          "say",
+          "Сон короткий и сухой, как всё здесь. Но силы вернулись."
+        ]
+      ]
+    },
+    {
+      "id": "rest_shade",
+      "label": "Отсидеться в тени",
+      "pre": [],
+      "eff": [
+        [
+          "add",
+          "player.fatigue",
+          -1
+        ],
+        [
+          "add",
+          "player.thirst",
+          1
+        ],
+        [
+          "say",
+          "Тень у стены тонкая, но своя. Дышишь и ждёшь вечера."
+        ]
+      ]
+    },
+    {
+      "id": "wait_heat",
+      "label": "Переждать зной",
+      "pre": [],
+      "eff": [
+        [
+          "add",
+          "player.thirst",
+          1
+        ],
+        [
+          "add",
+          "player.fatigue",
+          -1
+        ],
+        [
+          "say",
+          "Полдень стоит стеной. Двигаться — грех, дышать — работа."
+        ]
+      ]
+    },
+    {
+      "id": "watch_stars",
+      "label": "Продежурить до ночи",
+      "pre": [],
+      "eff": [
+        [
+          "flag",
+          "night",
+          1
+        ],
+        [
+          "add",
+          "player.fatigue",
+          -1
+        ],
+        [
+          "say",
+          "Ночь ложится на песок. Звёзды острые, как осколки соли."
+        ]
+      ]
+    },
+    {
+      "id": "trade_salt",
+      "label": "Купить тюк соли у караванщика",
+      "pre": [
+        [
+          "ge",
+          "player.money",
+          6
+        ],
+        [
+          "gt",
+          "karavan.goods",
+          0
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.money",
+          -6
+        ],
+        [
+          "give",
+          "player",
+          "salt"
+        ],
+        [
+          "set",
+          "karavan.goods",
+          5
+        ],
+        [
+          "add",
+          "player.rep",
+          1
+        ],
+        [
+          "say",
+          "Соль тяжёлая, белая, слепит. Караванщик щурится: — Держи крепче, здесь за неё режут."
+        ]
+      ]
+    },
+    {
+      "id": "sell_salt",
+      "label": "Сбыть соль",
+      "pre": [
+        [
+          "has",
+          "player",
+          "salt"
+        ]
+      ],
+      "eff": [
+        [
+          "take",
+          "player",
+          "salt"
+        ],
+        [
+          "add",
+          "player.money",
+          9
+        ],
+        [
+          "add",
+          "player.thirst",
+          1
+        ],
+        [
+          "add",
+          "player.fatigue",
+          1
+        ],
+        [
+          "say",
+          "Соль ушла в тень. Деньги — в кулак. Никто не спросил, откуда."
+        ]
+      ]
+    },
+    {
+      "id": "buy_medicine",
+      "label": "Купить снадобье у Миры",
+      "pre": [
+        [
+          "ge",
+          "player.money",
+          3
+        ],
+        [
+          "gt",
+          "mira.stock",
+          0
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.money",
+          -3
+        ],
+        [
+          "give",
+          "player",
+          "medicine"
+        ],
+        [
+          "add",
+          "player.relation_mira",
+          1
+        ],
+        [
+          "say",
+          "Мира усмехается: — Пей через зубы. И не спрашивай, из чего."
+        ]
+      ]
+    },
+    {
+      "id": "use_medicine",
+      "label": "Выпить снадобье",
+      "pre": [
+        [
+          "has",
+          "player",
+          "medicine"
+        ],
+        [
+          "lt",
+          "player.hp",
+          10
+        ]
+      ],
+      "eff": [
+        [
+          "take",
+          "player",
+          "medicine"
+        ],
+        [
+          "heal",
+          "player",
+          5
+        ],
+        [
+          "add",
+          "player.thirst",
+          1
+        ],
+        [
+          "say",
+          "Горечь до слёз, потом тепло. Раны стягивает быстрее, чем обещали."
+        ]
+      ]
+    },
+    {
+      "id": "gather_herbs",
+      "label": "Собрать травы за стеной",
+      "pre": [
+        [
+          "lt",
+          "desert.heat",
+          9
+        ],
+        [
+          "le",
+          "player.fatigue",
+          5
+        ]
+      ],
+      "eff": [
+        [
+          "give",
+          "player",
+          "herbs"
+        ],
+        [
+          "add",
+          "player.fatigue",
+          2
+        ],
+        [
+          "add",
+          "player.thirst",
+          1
+        ],
+        [
+          "say",
+          "Полынь и колючка. Пахнет горько, значит — годится."
+        ]
+      ]
+    },
+    {
+      "id": "trade_mira",
+      "label": "Продать травы Мире",
+      "pre": [
+        [
+          "has",
+          "player",
+          "herbs"
+        ],
+        [
+          "gt",
+          "mira.stock",
+          0
+        ]
+      ],
+      "eff": [
+        [
+          "take",
+          "player",
+          "herbs"
+        ],
+        [
+          "add",
+          "player.money",
+          4
+        ],
+        [
+          "add",
+          "player.relation_mira",
+          1
+        ],
+        [
+          "say",
+          "Мира платит без торга. Значит, травы нынче в цене."
+        ]
+      ]
+    },
+    {
+      "id": "repair_cart",
+      "label": "Починить телегу",
+      "pre": [
+        [
+          "has",
+          "player",
+          "tools"
+        ],
+        [
+          "lt",
+          "cart.frame",
+          6
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "cart.frame",
+          2
+        ],
+        [
+          "add",
+          "player.fatigue",
+          2
+        ],
+        [
+          "flag",
+          "cart_broken",
+          0
+        ],
+        [
+          "say",
+          "Ремень, гвоздь, пара крепких слов. Телега скрипит увереннее."
+        ]
+      ]
+    },
+    {
+      "id": "tend_donkey",
+      "label": "Обиходить осла",
+      "pre": [
+        [
+          "has",
+          "player",
+          "tools"
+        ],
+        [
+          "gt",
+          "player.donkey_wear",
+          0
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.donkey_wear",
+          -2
+        ],
+        [
+          "add",
+          "player.fatigue",
+          1
+        ],
+        [
+          "say",
+          "Подковы, ссадины, терпение. Осёл косится благодарно, если он умеет."
+        ]
+      ]
+    },
+    {
+      "id": "mend_cloak",
+      "label": "Залатать плащ",
+      "pre": [
+        [
+          "has",
+          "player",
+          "tools"
+        ],
+        [
+          "lt",
+          "cloak.condition",
+          6
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "cloak.condition",
+          2
+        ],
+        [
+          "add",
+          "player.fatigue",
+          1
+        ],
+        [
+          "say",
+          "Нитка суровая, стежок кривой. Зато ветер не свистит в спину."
+        ]
+      ]
+    },
+    {
+      "id": "ask_rumors",
+      "label": "Расспросить о слухах",
+      "pre": [
+        [
+          "ge",
+          "player.money",
+          1
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.money",
+          -1
+        ],
+        [
+          "flag",
+          "salt_rumor",
+          1
+        ],
+        [
+          "say",
+          "— Караван с солью ушёл на юг и растворился в мареве. Ни следа, ни костей."
+        ]
+      ]
+    },
+    {
+      "id": "recon_dunes",
+      "label": "Разведать дюны",
+      "pre": [
+        [
+          "le",
+          "player.fatigue",
+          5
+        ],
+        [
+          "gt",
+          "player.water",
+          0
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.thirst",
+          2
+        ],
+        [
+          "add",
+          "player.fatigue",
+          2
+        ],
+        [
+          "flag",
+          "found_tracks",
+          1
+        ],
+        [
+          "add",
+          "player.rep",
+          1
+        ],
+        [
+          "say",
+          "Ветер стёр всё, но у скалы — следы. Тяжёлые. Соляные."
+        ]
+      ]
+    },
+    {
+      "id": "pay_debt",
+      "label": "Отдать долг Азизу",
+      "pre": [
+        [
+          "ge",
+          "player.money",
+          5
+        ],
+        [
+          "gt",
+          "player.debt",
+          0
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.money",
+          -5
+        ],
+        [
+          "add",
+          "player.debt",
+          -5
+        ],
+        [
+          "add",
+          "player.trust_aziz",
+          2
+        ],
+        [
+          "say",
+          "Азиз пересчитывает и коротко кивает: — Долг — это верёвка. Одной петлёй меньше."
+        ]
+      ]
+    },
+    {
+      "id": "take_credit",
+      "label": "Взять воду в долг",
+      "pre": [
+        [
+          "lt",
+          "player.debt",
+          15
+        ],
+        [
+          "ge",
+          "player.trust_aziz",
+          1
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.water",
+          3
+        ],
+        [
+          "add",
+          "player.debt",
+          4
+        ],
+        [
+          "add",
+          "player.trust_aziz",
+          -1
+        ],
+        [
+          "say",
+          "Азиз отмечает палочкой на стене. Долг растёт быстрее хлеба."
+        ]
+      ]
+    },
+    {
+      "id": "bribe_voron",
+      "label": "Подмазать Ворона",
+      "pre": [
+        [
+          "ge",
+          "player.money",
+          3
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.money",
+          -3
+        ],
+        [
+          "add",
+          "player.trust_voron",
+          2
+        ],
+        [
+          "say",
+          "Ворон прячет монету в кулак: — Порядок стоит. Ты понял."
+        ]
+      ]
+    },
+    {
+      "id": "guard_shift",
+      "label": "Отстоять смену с Вороном",
+      "pre": [
+        [
+          "ge",
+          "player.trust_voron",
+          2
+        ],
+        [
+          "le",
+          "player.fatigue",
+          5
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.money",
+          4
+        ],
+        [
+          "add",
+          "player.fatigue",
+          2
+        ],
+        [
+          "add",
+          "player.trust_voron",
+          1
+        ],
+        [
+          "say",
+          "Ночь длинная, костёр малый. Ворон молчит — это почти доверие."
+        ]
+      ]
+    },
+    {
+      "id": "patrol_well",
+      "label": "Обойти колодец дозором",
+      "pre": [
+        [
+          "ge",
+          "player.trust_voron",
+          1
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.trust_voron",
+          1
+        ],
+        [
+          "add",
+          "player.fatigue",
+          1
+        ],
+        [
+          "add",
+          "player.money",
+          1
+        ],
+        [
+          "say",
+          "Шаги по кругу, тени по стенам. Уэллс спит чутко."
+        ]
+      ]
+    },
+    {
+      "id": "ride_donkey",
+      "label": "Поехать на осле",
+      "pre": [
+        [
+          "gt",
+          "player.donkey_wear",
+          0
+        ],
+        [
+          "lt",
+          "player.donkey_wear",
+          6
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.fatigue",
+          -2
+        ],
+        [
+          "add",
+          "player.donkey_wear",
+          1
+        ],
+        [
+          "add",
+          "player.thirst",
+          1
+        ],
+        [
+          "say",
+          "Пыль под копытами, дорога под солнцем. Быстрее, чем на ногах."
+        ]
+      ]
+    },
+    {
+      "id": "hunt_lizard",
+      "label": "Поймать ящерицу",
+      "pre": [
+        [
+          "gt",
+          "player.water",
+          0
+        ],
+        [
+          "le",
+          "player.fatigue",
+          4
+        ]
+      ],
+      "eff": [
+        [
+          "dmg",
+          "player",
+          {
+            "roll": "1d4",
+            "plus": "player.skill_trade"
+          }
+        ],
+        [
+          "add",
+          "player.money",
+          2
+        ],
+        [
+          "add",
+          "player.thirst",
+          1
+        ],
+        [
+          "say",
+          "Камни горячие, ящерица быстрая. Но в котелке будет мясо."
+        ]
+      ]
+    },
+    {
+      "id": "mend_skin",
+      "label": "Зашить бурдюк",
+      "pre": [
+        [
+          "ge",
+          "player.money",
+          1
+        ],
+        [
+          "lt",
+          "water_skin.condition",
+          8
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.money",
+          -1
+        ],
+        [
+          "add",
+          "water_skin.condition",
+          1
+        ],
+        [
+          "say",
+          "Нитка суровая, шов кривой. Зато не каплет на песок."
+        ]
+      ]
+    },
+    {
+      "id": "befriend_vodonos",
+      "label": "Подкупить водоноса",
+      "pre": [
+        [
+          "ge",
+          "player.money",
+          1
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.money",
+          -1
+        ],
+        [
+          "rel",
+          "player",
+          "vodonos",
+          "trust",
+          2
+        ],
+        [
+          "say",
+          "Мальчишка прячет монету за щёку: — Теперь ты мне как брат. Почти."
+        ]
+      ]
+    },
+    {
+      "id": "steal_water",
+      "label": "Слить воду с водоносом",
+      "pre": [
+        [
+          "rel_gt",
+          "player",
+          "vodonos",
+          "trust",
+          1
+        ],
+        [
+          "lt",
+          "aziz.mood",
+          3
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.water",
+          3
+        ],
+        [
+          "add",
+          "player.trust_aziz",
+          -2
+        ],
+        [
+          "flag",
+          "stole_water",
+          1
+        ],
+        [
+          "say",
+          "Мальчишка смеётся беззвучно: — Быстрее воды. Никто не видел."
+        ]
+      ]
+    },
+    {
+      "id": "caravan_job",
+      "label": "Наняться к караванщику",
+      "pre": [
+        [
+          "ge",
+          "player.trust_aziz",
+          2
+        ],
+        [
+          "gt",
+          "karavan.goods",
+          0
+        ],
+        [
+          "le",
+          "player.fatigue",
+          6
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.money",
+          7
+        ],
+        [
+          "add",
+          "player.fatigue",
+          3
+        ],
+        [
+          "add",
+          "player.thirst",
+          2
+        ],
+        [
+          "add",
+          "player.rep",
+          1
+        ],
+        [
+          "say",
+          "Караванщик кидает мешочек: — Три дня пути. Воды бери больше, чем кажется надо."
+        ]
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "pre": [
+        [
+          "gt",
+          "desert.heat",
+          7
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.thirst",
+          1
+        ],
+        [
+          "dmg",
+          "player",
+          1
+        ],
+        [
+          "say",
+          "Суховей идёт по улице, как хозяин. Пыль скрипит на зубах."
+        ]
+      ],
+      "once": true
+    },
+    {
+      "pre": [
+        [
+          "flag",
+          "night"
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.fatigue",
+          -1
+        ],
+        [
+          "set",
+          "aziz.mood",
+          1
+        ],
+        [
+          "say",
+          "Ночь падает сразу, без сумерек. Холодно, звёздно, спокойно."
+        ]
+      ],
+      "once": true
+    },
+    {
+      "pre": [
+        [
+          "flag",
+          "found_tracks"
+        ],
+        [
+          "ge",
+          "player.rep",
+          2
+        ]
+      ],
+      "eff": [
+        [
+          "set",
+          "salt_rumor",
+          1
+        ],
+        [
+          "add",
+          "player.rep",
+          1
+        ],
+        [
+          "say",
+          "Слух о соляных следах пошёл по двору быстрее ветра."
+        ]
+      ],
+      "once": true
+    },
+    {
+      "pre": [
+        [
+          "flag",
+          "salt_rumor"
+        ],
+        [
+          "ge",
+          "player.rep",
+          3
+        ]
+      ],
+      "eff": [
+        [
+          "set",
+          "karavan.goods",
+          6
+        ],
+        [
+          "add",
+          "player.trust_aziz",
+          1
+        ],
+        [
+          "say",
+          "Караванщик вернулся и привёл верблюдов. — Слышал, ты искал соль? Нашёл вопрос."
+        ]
+      ],
+      "once": true
+    },
+    {
+      "pre": [
+        [
+          "gt",
+          "player.debt",
+          10
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.money",
+          -3
+        ],
+        [
+          "add",
+          "player.trust_aziz",
+          -1
+        ],
+        [
+          "flag",
+          "debt_marked",
+          1
+        ],
+        [
+          "say",
+          "Азиз чертит ещё одну палочку: — Долг помнит даже песок."
+        ]
+      ],
+      "once": true
+    },
+    {
+      "pre": [
+        [
+          "flag",
+          "stole_water"
+        ],
+        [
+          "gt",
+          "player.trust_aziz",
+          -1
+        ]
+      ],
+      "eff": [
+        [
+          "set",
+          "well_locked",
+          1
+        ],
+        [
+          "add",
+          "player.trust_aziz",
+          -1
+        ],
+        [
+          "say",
+          "Колодец закрыли на засов. Азиз ни на кого не смотрит — значит, смотрит на всех."
+        ]
+      ],
+      "once": true
+    },
+    {
+      "pre": [
+        [
+          "le",
+          "player.hp",
+          3
+        ],
+        [
+          "ge",
+          "player.money",
+          3
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.money",
+          -3
+        ],
+        [
+          "heal",
+          "player",
+          2
+        ],
+        [
+          "say",
+          "Мира появляется сама: — Умирать тут невыгодно. Пей, потом отработаешь."
+        ]
+      ],
+      "once": true
+    }
+  ],
+  "constraints": {
+    "vital": [
+      "aziz",
+      "voron",
+      "mira",
+      "vodonos",
+      "karavan",
+      "player"
+    ],
+    "min_hp": 1
+  }
+}

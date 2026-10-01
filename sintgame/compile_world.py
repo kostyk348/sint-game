@@ -34,8 +34,27 @@ PROMPT = """Ты — компилятор игрового мира. Вход: �
 """
 
 
-def compile_world(lore, rounds=3):
-    prompt = PROMPT.format(schema=SCHEMA_TEXT, lore=lore)
+SANDBOX_PROMPT = """Ты — компилятор ОТКРЫТОГО игрового мира (сэндбокс). Вход: лор. Выход: ОДИН JSON-объект по схеме. Только JSON.
+
+{schema}
+
+ТРЕБОВАНИЯ (сэндбокс, без финала):
+- id сущностей — латиница, snake_case; игрок обязан иметь id "player" и attrs hp, hp_max.
+- НЕ используй эффект ["end", ...] вообще — у мира НЕТ финала (открытый мир).
+- >= 20 действий; многие — рутинные и УСЛОВНЫЕ (торг, вода, сон, ремонт, разведка, работа).
+- ресурсы (вода, деньги, усталость, доверие, износ) ГЕЙТЯТ доступность действий через pre.
+- триггеры только МЕНЯЮТ состояние (не завершают игру).
+- мир должен позволять играть сотни ходов: всегда есть дешёвое доступное действие.
+- блок "constraints": {{"vital":[...],"min_hp":1}} — кто не должен погибать.
+- текст "say"/"desc"/"voice" — на русском, в тоне лора.
+
+ЛОР:
+{lore}
+"""
+
+
+def compile_world(lore, rounds=3, sandbox=False):
+    prompt = (SANDBOX_PROMPT if sandbox else PROMPT).format(schema=SCHEMA_TEXT, lore=lore)
     for i in range(rounds):
         world, raw = gen_json(prompt)
         if world is None:

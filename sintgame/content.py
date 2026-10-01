@@ -74,6 +74,11 @@ def _merge(world, patch):
     return w
 
 
+def merge(world, patch):
+    """Публичная обёртка: применить патч к миру (копия). Бросает при конфликте id."""
+    return _merge(world, patch)
+
+
 def verify(world, require_endings=True):
     errs = validate(world)
     if errs:

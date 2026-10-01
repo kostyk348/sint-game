@@ -194,7 +194,9 @@ def report(data, cap=50000, full=False):
     d = dangling_prerequisites(data)
     lines = []
     total, got = len(r["declared"]), len(r["reachable"])
-    if total and got >= total:
+    if total == 0:
+        head = "reachability: OPEN WORLD (концовки не объявлены — сэндбокс без финала)"
+    elif total and got >= total:
         head = f"reachability: ALL {total} declared endings REACHABLE (witness = proof)"
     elif r["exhausted"]:
         head = f"reachability: EXHAUSTED — proven reachable {got}/{total}"

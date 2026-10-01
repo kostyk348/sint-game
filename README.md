@@ -69,6 +69,8 @@ sintgame editor examples/lighthouse/world.json -o editor.html   # HTML-реда�
 sintgame balance examples/lighthouse/world.json --trials 3000  # распределение концовок
 sintgame tune examples/station/world.json -o tuned.json        # авто-тюнинг чисел
 sintgame run examples/lighthouse/world.json --turns 60         # прогон 60 ходов
+sintgame sandbox examples/campaign/world.json --turns 500      # открытый прогон 500 ходов
+sintgame compile examples/sandbox/lore.md -o open.json --sandbox  # мир без концовок
 ```
 
 Играть свободным текстом (агент-интент + ворота):
@@ -79,7 +81,7 @@ SINT_GEN_CMD="opencode run --pure" \
   --free "обнять Ию, она плачет"
 ```
 
-Тесты: `make test` (или `python -m pytest -q`) — 42 теста, без сети.
+Тесты: `make test` (или `python -m pytest -q`) — 45 тестов, без сети.
 
 ## 4. Что уже работает
 
@@ -108,6 +110,11 @@ SINT_GEN_CMD="opencode run --pure" \
   — самодостаточный HTML с графом зависимостей и свидетелями), **баланс** (`balance`),
   **тюнинг** (`tune` — авто-подбор чисел), **прогон** (`run --turns N` — многоэпизодный соак
   с проверкой инвариантов).
+- **Открытые миры и долгие кампании**: сэндбокс без обязательных концовок
+  (`compile --sandbox`), непрерывные прогоны 500+ шагов (`sandbox`), опциональный **директор**,
+  который добавляет события прямо в рантайме под воротами (механика в духе Pax Historia).
+- **Валидатор стабильности**: ловит петли триггеров (каскад упирается в guard) — иначе
+  компилятор мог собрать мир, ломающийся на первом же ходу.
 - **Детерминированный реплей** + режим `--variety` (живость вместо копий).
 - **Сохранение состояния** целиком, **включая `rng`** (иначе сейв/лоад рассинхронится).
 - **Дисциплина prompt-кэша**: стабильный префикс, чтобы кэш нейронки не ломался.

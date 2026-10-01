@@ -86,6 +86,25 @@ def _check_eff(x, ents, errs, ctx):
         errs.append(f"{ctx}: unknown EFF op '{op}'")
 
 
+def stability(data, trials=20, depth=60, seed0=10):
+    """Сколько прогонов упираются в guard каскада триггеров (петля триггеров)."""
+    unstable = 0
+    for t in range(trials):
+        w = World(copy.deepcopy(data), seed=seed0 + t)
+        rng = random.Random(seed0 + t)
+        for _ in range(depth):
+            if w.ended:
+                break
+            acts = w.available()
+            if not acts:
+                break
+            w.act(rng.choice(acts)["id"])
+            if w.hit_guard:
+                unstable += 1
+                break
+    return unstable
+
+
 def validate(data):
     errs = []
     if not isinstance(data, dict):
@@ -121,6 +140,14 @@ def validate(data):
             errs.append("no action available at start")
     except Exception as ex:
         errs.append(f"kernel rejected world: {ex}")
+    # стабильность: петля триггеров (каскад упирается в guard) — это баг мира, а не дизайн
+    if not errs:
+        try:
+            u = stability(data)
+            if u:
+                errs.append(f"unstable: петля триггеров — каскад упирается в guard в {u} прогонах")
+        except Exception as ex:
+            errs.append(f"stability check failed: {ex}")
     return errs
 
 

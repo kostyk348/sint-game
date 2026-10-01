@@ -1,0 +1,1328 @@
+{
+  "schema": 1,
+  "title": "Акра: Караван под бурей",
+  "tone": "Жара, пыль и усталость; редкая прохлада у колодца. Слова здесь стоят дороже монет.",
+  "seed": 184729,
+  "entities": {
+    "player": {
+      "type": "actor",
+      "tags": [
+        "player",
+        "погонщик"
+      ],
+      "attrs": {
+        "hp": 10,
+        "hp_max": 10,
+        "water": 6,
+        "fatigue": 0,
+        "coins": 5,
+        "nights": 0
+      },
+      "desc": "Новый погонщик каравана Самира. Принял дело после исчезновения прежнего.",
+      "voice": "внутренний голос сухой и усталый; короткие оборванные фразы, как шаги по песку"
+    },
+    "samir": {
+      "type": "actor",
+      "tags": [
+        "купец",
+        "караван",
+        "хозяин"
+      ],
+      "attrs": {
+        "hp": 8,
+        "hp_max": 8,
+        "trust": 0,
+        "cold": 5,
+        "guilt": 3
+      },
+      "desc": "Хозяин каравана, считает каждую монету и скрывает долг.",
+      "voice": "скупой и сухой, будто выдаёт слова по счётной палке; короткие фразы, пауза перед каждым ответом"
+    },
+    "leya": {
+      "type": "actor",
+      "tags": [
+        "знахарка",
+        "травы",
+        "знает_правду"
+      ],
+      "attrs": {
+        "hp": 8,
+        "hp_max": 8,
+        "trust": 0,
+        "knowledge": 5
+      },
+      "desc": "Знахарка. Знает, что случилось с прежним погонщиком, но говорит не сразу.",
+      "voice": "неторопливо, с паузами; говорит образами трав и болезней, редко называет вещи прямо"
+    },
+    "tim": {
+      "type": "actor",
+      "tags": [
+        "сирота",
+        "караван",
+        "вор"
+      ],
+      "attrs": {
+        "hp": 6,
+        "hp_max": 6,
+        "trust": 0,
+        "hunger": 4
+      },
+      "desc": "Мальчик-сирота при караване. Ворует, но предан тому, кто его кормит.",
+      "voice": "отрывисто и исподлобья; длинные фразы только когда доверяет"
+    },
+    "elder": {
+      "type": "actor",
+      "tags": [
+        "старшина",
+        "город",
+        "закон"
+      ],
+      "attrs": {
+        "hp": 8,
+        "hp_max": 8,
+        "trust": 0,
+        "suspicion": 2,
+        "patience": 3
+      },
+      "desc": "Старшина Акры. Выдаёт разрешение на выход, не любит долгов и чужаков.",
+      "voice": "казённо и веско, как читает указ; любит ссылаться на закон и долг"
+    },
+    "barhan": {
+      "type": "actor",
+      "tags": [
+        "разбойники",
+        "пустыня",
+        "угроза"
+      ],
+      "attrs": {
+        "hp": 10,
+        "hp_max": 10,
+        "threat": 5
+      },
+      "desc": "Шайка Бархана, что держит дальние колодцы и не любит чужих караванов.",
+      "voice": "раскатисто и с угрозой; говорит о пустыне как о своей добыче"
+    },
+    "camels": {
+      "type": "creature",
+      "tags": [
+        "верблюды",
+        "упряжь"
+      ],
+      "attrs": {
+        "hp": 6,
+        "hp_max": 6,
+        "wear": 0
+      },
+      "desc": "Шесть верблюдов каравана. Худые, но терпеливые.",
+      "voice": "без речи; хрип, храп и скрип упряжи"
+    },
+    "desert": {
+      "type": "place",
+      "tags": [
+        "пустыня",
+        "бури",
+        "колодцы"
+      ],
+      "attrs": {
+        "heat": 7,
+        "storm": 3
+      },
+      "desc": "Пустыня до Бархана. Бури, колодцы и кости заблудших.",
+      "voice": "без речи; только ветер, песок и редкий холод ночи"
+    },
+    "debt_note": {
+      "type": "item",
+      "tags": [
+        "долг",
+        "улика"
+      ],
+      "attrs": {},
+      "desc": "Долговая записка с именем прежнего погонщика.",
+      "voice": ""
+    },
+    "knife": {
+      "type": "item",
+      "tags": [
+        "улика",
+        "нож"
+      ],
+      "attrs": {},
+      "desc": "Нож прежнего погонщика, что носит Тим.",
+      "voice": ""
+    },
+    "permit": {
+      "type": "item",
+      "tags": [
+        "разрешение",
+        "бумага"
+      ],
+      "attrs": {},
+      "desc": "Разрешение на выход, подписанное на имя пропавшего.",
+      "voice": ""
+    },
+    "waterskin": {
+      "type": "item",
+      "tags": [
+        "вода",
+        "снаряжение"
+      ],
+      "attrs": {},
+      "desc": "Потемневший от солнца мех с водой.",
+      "voice": ""
+    },
+    "herbs": {
+      "type": "item",
+      "tags": [
+        "травы",
+        "торг"
+      ],
+      "attrs": {},
+      "desc": "Пучок сухих трав Леи от жара и бессонницы.",
+      "voice": ""
+    }
+  },
+  "holds": [
+    [
+      "samir",
+      "debt_note"
+    ],
+    [
+      "tim",
+      "knife"
+    ],
+    [
+      "player",
+      "waterskin"
+    ],
+    [
+      "leya",
+      "herbs"
+    ],
+    [
+      "elder",
+      "permit"
+    ]
+  ],
+  "relations": [
+    [
+      "samir",
+      "player",
+      "trust",
+      0
+    ],
+    [
+      "leya",
+      "player",
+      "trust",
+      0
+    ],
+    [
+      "tim",
+      "player",
+      "trust",
+      0
+    ],
+    [
+      "elder",
+      "player",
+      "trust",
+      0
+    ],
+    [
+      "samir",
+      "leya",
+      "fear",
+      4
+    ],
+    [
+      "samir",
+      "tim",
+      "cold",
+      2
+    ],
+    [
+      "leya",
+      "samir",
+      "suspicion",
+      6
+    ],
+    [
+      "elder",
+      "samir",
+      "suspicion",
+      3
+    ],
+    [
+      "barhan",
+      "player",
+      "threat",
+      2
+    ]
+  ],
+  "flags": {
+    "scouted": 0,
+    "heard_whisper": 0,
+    "tim_fed": 0,
+    "knows_truth": 0,
+    "leya_confessed": 0,
+    "permit_found": 0,
+    "debt_known": 0,
+    "proof_knife": 0,
+    "leya_confirmed": 0,
+    "evidence_ready": 0,
+    "debt_paid": 0,
+    "caravan_bought": 0,
+    "samir_confronted": 0,
+    "pact_sealed": 0,
+    "storm_ready": 0,
+    "near_death": 0,
+    "exhausted": 0,
+    "exposed": 0,
+    "samir_broke": 0
+  },
+  "actions": [
+    {
+      "id": "wait_dusk",
+      "label": "Переждать жару до вечера",
+      "pre": [],
+      "eff": [
+        [
+          "add",
+          "player.fatigue",
+          -1
+        ],
+        [
+          "add",
+          "player.nights",
+          1
+        ],
+        [
+          "add",
+          "player.water",
+          -1
+        ]
+      ]
+    },
+    {
+      "id": "find_water",
+      "label": "Искать колодец в дюнах",
+      "pre": [
+        [
+          "lt",
+          "player.water",
+          3
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.water",
+          3
+        ],
+        [
+          "add",
+          "player.fatigue",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "drink_water",
+      "label": "Выпить воды из меха",
+      "pre": [
+        [
+          "has",
+          "player",
+          "waterskin"
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.water",
+          2
+        ],
+        [
+          "add",
+          "player.fatigue",
+          -1
+        ]
+      ]
+    },
+    {
+      "id": "feed_camel",
+      "label": "Напоить и накормить верблюдов",
+      "pre": [
+        [
+          "gt",
+          "player.water",
+          0
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.water",
+          -1
+        ],
+        [
+          "add",
+          "player.fatigue",
+          -1
+        ],
+        [
+          "add",
+          "camels.wear",
+          -1
+        ]
+      ]
+    },
+    {
+      "id": "repair_gear",
+      "label": "Починить упряжь и вьюки",
+      "pre": [],
+      "eff": [
+        [
+          "add",
+          "player.fatigue",
+          1
+        ],
+        [
+          "add",
+          "camels.wear",
+          -1
+        ]
+      ]
+    },
+    {
+      "id": "scout_dunes",
+      "label": "Разведать тропу вперёд",
+      "pre": [],
+      "eff": [
+        [
+          "add",
+          "player.fatigue",
+          1
+        ],
+        [
+          "flag",
+          "scouted",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "count_coins",
+      "label": "Пересчитать монеты",
+      "pre": [],
+      "eff": [
+        [
+          "say",
+          "Монеты тускло звенят в ладони, и их всё так же мало."
+        ]
+      ]
+    },
+    {
+      "id": "rest_camp",
+      "label": "Разбить лагерь и отдохнуть",
+      "pre": [],
+      "eff": [
+        [
+          "heal",
+          "player",
+          2
+        ],
+        [
+          "add",
+          "player.fatigue",
+          -2
+        ]
+      ]
+    },
+    {
+      "id": "trade_leya",
+      "label": "Купить травы у Леи",
+      "pre": [
+        [
+          "gt",
+          "player.coins",
+          0
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.coins",
+          -1
+        ],
+        [
+          "take",
+          "leya",
+          "herbs"
+        ],
+        [
+          "give",
+          "player",
+          "herbs"
+        ],
+        [
+          "rel",
+          "leya",
+          "player",
+          "trust",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "talk_samir",
+      "label": "Поговорить с Самиром о караване",
+      "pre": [],
+      "eff": [
+        [
+          "say",
+          "Самир говорит коротко, будто считает каждое слово."
+        ],
+        [
+          "add",
+          "samir.trust",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "talk_tim",
+      "label": "Поговорить с Тимом",
+      "pre": [],
+      "eff": [
+        [
+          "say",
+          "Тим смотрит исподлобья и молчит, как камень на солнце."
+        ],
+        [
+          "rel",
+          "tim",
+          "player",
+          "trust",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "talk_leya",
+      "label": "Расспросить Лею о городе",
+      "pre": [],
+      "eff": [
+        [
+          "say",
+          "Лея отвечает уклончиво, но не грубо."
+        ],
+        [
+          "add",
+          "leya.trust",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "talk_elder",
+      "label": "Явиться к старшине за разрешением",
+      "pre": [],
+      "eff": [
+        [
+          "say",
+          "Старшина листает бумаги, не поднимая глаз."
+        ],
+        [
+          "add",
+          "elder.suspicion",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "feed_tim",
+      "label": "Накормить Тима",
+      "pre": [
+        [
+          "gt",
+          "player.coins",
+          0
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.coins",
+          -1
+        ],
+        [
+          "add",
+          "tim.hunger",
+          -3
+        ],
+        [
+          "flag",
+          "tim_fed",
+          1
+        ],
+        [
+          "rel",
+          "tim",
+          "player",
+          "trust",
+          3
+        ]
+      ]
+    },
+    {
+      "id": "forge_track",
+      "label": "Сбить следы каравана от города",
+      "pre": [
+        [
+          "flag",
+          "scouted",
+          1
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.fatigue",
+          1
+        ],
+        [
+          "add",
+          "elder.suspicion",
+          -1
+        ]
+      ]
+    },
+    {
+      "id": "bribe_elder",
+      "label": "Занести старшине серебра",
+      "pre": [
+        [
+          "ge",
+          "player.coins",
+          3
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.coins",
+          -3
+        ],
+        [
+          "add",
+          "elder.suspicion",
+          -2
+        ],
+        [
+          "rel",
+          "elder",
+          "player",
+          "trust",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "earn_coins",
+      "label": "Продать товар на базаре",
+      "pre": [],
+      "eff": [
+        [
+          "add",
+          "player.coins",
+          2
+        ],
+        [
+          "add",
+          "player.fatigue",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "listen_samir",
+      "label": "Подслушать разговор Самира",
+      "pre": [
+        [
+          "ge",
+          "player.nights",
+          2
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Из шатра доносится сдавленный шёпот Самира."
+        ],
+        [
+          "flag",
+          "heard_whisper",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "press_samir",
+      "label": "Надавить на Самира",
+      "pre": [
+        [
+          "flag",
+          "heard_whisper",
+          1
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "samir.guilt",
+          2
+        ],
+        [
+          "rel",
+          "samir",
+          "player",
+          "trust",
+          -1
+        ]
+      ]
+    },
+    {
+      "id": "ask_leya_truth",
+      "label": "Спросить Лею о прежнем погонщике",
+      "pre": [
+        [
+          "ge",
+          "leya.trust",
+          3
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Лея долго молчит, потом роняет: «Он не заблудился»."
+        ],
+        [
+          "flag",
+          "knows_truth",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "beg_leya",
+      "label": "Уговорить Лею сказать больше",
+      "pre": [
+        [
+          "flag",
+          "knows_truth"
+        ],
+        [
+          "has",
+          "player",
+          "herbs"
+        ]
+      ],
+      "eff": [
+        [
+          "take",
+          "player",
+          "herbs"
+        ],
+        [
+          "add",
+          "leya.knowledge",
+          1
+        ],
+        [
+          "flag",
+          "leya_confessed",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "search_tent",
+      "label": "Обыскать шатёр Самира",
+      "pre": [
+        [
+          "ge",
+          "player.nights",
+          1
+        ],
+        [
+          "gt",
+          "samir.trust",
+          0
+        ]
+      ],
+      "eff": [
+        [
+          "take",
+          "samir",
+          "debt_note"
+        ],
+        [
+          "give",
+          "player",
+          "debt_note"
+        ],
+        [
+          "flag",
+          "permit_found",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "read_note",
+      "label": "Прочесть долговую записку",
+      "pre": [
+        [
+          "has",
+          "player",
+          "debt_note"
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "В записке — имя прежнего погонщика и сумма, которой нет."
+        ],
+        [
+          "flag",
+          "debt_known",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "ask_knife",
+      "label": "Спросить Тима про нож",
+      "pre": [
+        [
+          "flag",
+          "tim_fed"
+        ],
+        [
+          "ge",
+          "tim.trust",
+          3
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Тим сжимает нож: «Это его. Он мне оставил»."
+        ],
+        [
+          "take",
+          "tim",
+          "knife"
+        ],
+        [
+          "give",
+          "player",
+          "knife"
+        ],
+        [
+          "flag",
+          "proof_knife",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "show_knife",
+      "label": "Показать нож Лее",
+      "pre": [
+        [
+          "flag",
+          "proof_knife"
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Лея узнаёт нож и бледнеет, как выгоревшая ткань."
+        ],
+        [
+          "add",
+          "leya.trust",
+          1
+        ],
+        [
+          "flag",
+          "leya_confirmed",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "gather_evidence",
+      "label": "Собрать доказательства воедино",
+      "pre": [
+        [
+          "flag",
+          "leya_confirmed"
+        ],
+        [
+          "has",
+          "player",
+          "debt_note"
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Нож, записка, слово Леи — нить натягивается и готова лопнуть."
+        ],
+        [
+          "flag",
+          "evidence_ready",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "pay_debt",
+      "label": "Погасить долг старшине",
+      "pre": [
+        [
+          "flag",
+          "debt_known"
+        ],
+        [
+          "ge",
+          "player.coins",
+          5
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.coins",
+          -5
+        ],
+        [
+          "flag",
+          "debt_paid",
+          1
+        ],
+        [
+          "rel",
+          "elder",
+          "player",
+          "trust",
+          3
+        ]
+      ]
+    },
+    {
+      "id": "buy_caravan",
+      "label": "Выкупить караван у старшины",
+      "pre": [
+        [
+          "flag",
+          "debt_paid"
+        ],
+        [
+          "ge",
+          "player.coins",
+          6
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.coins",
+          -6
+        ],
+        [
+          "flag",
+          "caravan_bought",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "confront_samir",
+      "label": "Прижать Самира к ответу",
+      "pre": [
+        [
+          "flag",
+          "evidence_ready"
+        ],
+        [
+          "ge",
+          "samir.guilt",
+          4
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Самир отводит взгляд: «Ты не понимаешь, что такое буря»."
+        ],
+        [
+          "flag",
+          "samir_confronted",
+          1
+        ],
+        [
+          "add",
+          "samir.cold",
+          -2
+        ]
+      ]
+    },
+    {
+      "id": "bring_elder",
+      "label": "Привести Самира на суд старшины",
+      "pre": [
+        [
+          "flag",
+          "samir_confronted"
+        ],
+        [
+          "ge",
+          "elder.trust",
+          2
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Ты ставишь Самира перед старшиной и кладёшь нож на стол, поверх бумаг."
+        ]
+      ]
+    },
+    {
+      "id": "pact_samir",
+      "label": "Заключить молчаливый уговор",
+      "pre": [
+        [
+          "flag",
+          "knows_truth"
+        ],
+        [
+          "ge",
+          "samir.trust",
+          4
+        ],
+        [
+          "not",
+          [
+            "flag",
+            "evidence_ready"
+          ]
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Самир протягивает руку: «Бархан — и мы квиты»."
+        ],
+        [
+          "flag",
+          "pact_sealed",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "prepare_storm",
+      "label": "Готовить караван к дальней буре",
+      "pre": [
+        [
+          "ge",
+          "player.nights",
+          3
+        ],
+        [
+          "has",
+          "player",
+          "waterskin"
+        ]
+      ],
+      "eff": [
+        [
+          "add",
+          "player.water",
+          2
+        ],
+        [
+          "add",
+          "player.fatigue",
+          2
+        ],
+        [
+          "flag",
+          "storm_ready",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "ride_storm",
+      "label": "Увести караван к стене песка",
+      "pre": [
+        [
+          "flag",
+          "storm_ready"
+        ],
+        [
+          "flag",
+          "scouted"
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Ты поворачиваешь верблюдов навстречу стене песка, и упряжь скрипит, как чьи-то зубы."
+        ]
+      ]
+    },
+    {
+      "id": "end_truth",
+      "label": "Вывести Самира на признание",
+      "pre": [
+        [
+          "flag",
+          "samir_confronted"
+        ],
+        [
+          "ge",
+          "elder.trust",
+          2
+        ],
+        [
+          "has",
+          "player",
+          "knife"
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Самир опускается на колени перед старшиной. Правда выходит наружу, как вода из пробитого меха."
+        ],
+        [
+          "end",
+          "truth"
+        ]
+      ]
+    },
+    {
+      "id": "end_silence",
+      "label": "Сохранить сделку и уйти в Бархан",
+      "pre": [
+        [
+          "flag",
+          "pact_sealed"
+        ],
+        [
+          "flag",
+          "scouted"
+        ],
+        [
+          "ge",
+          "player.nights",
+          2
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Караван уходит молча, унося тайну в барханы, и никто не оборачивается."
+        ],
+        [
+          "end",
+          "silence"
+        ]
+      ]
+    },
+    {
+      "id": "end_debt",
+      "label": "Выкупить караван своим именем",
+      "pre": [
+        [
+          "flag",
+          "caravan_bought"
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Ты выкупаешь караван и вписываешь своё имя в разрешение, поверх чужого."
+        ],
+        [
+          "end",
+          "debt"
+        ]
+      ]
+    },
+    {
+      "id": "end_storm",
+      "label": "Уйти в бурю, зная, что не вернёшься",
+      "pre": [
+        [
+          "flag",
+          "storm_ready"
+        ],
+        [
+          "flag",
+          "scouted"
+        ],
+        [
+          "ge",
+          "player.nights",
+          4
+        ],
+        [
+          "flag",
+          "scouted"
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Песчаная стена смыкается за караваном, и ты не оборачиваешься."
+        ],
+        [
+          "end",
+          "storm"
+        ]
+      ]
+    }
+  ],
+  "triggers": [
+    {
+      "pre": [
+        [
+          "le",
+          "player.hp",
+          1
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Жажда и зной выпивают тебя до дна; ещё немного — и ты останешься в дюнах."
+        ],
+        [
+          "flag",
+          "near_death",
+          1
+        ]
+      ],
+      "once": true
+    },
+    {
+      "pre": [
+        [
+          "ge",
+          "player.fatigue",
+          8
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Руки не поднимаются, и вьюки кажутся тяжелее камня. Караван встаёт."
+        ],
+        [
+          "flag",
+          "exhausted",
+          1
+        ]
+      ],
+      "once": true
+    },
+    {
+      "pre": [
+        [
+          "flag",
+          "proof_knife"
+        ],
+        [
+          "flag",
+          "heard_whisper"
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Слишком многое сходится воедино; слух о прежнем погонщике уже ползёт по стоянке."
+        ],
+        [
+          "flag",
+          "exposed",
+          1
+        ]
+      ],
+      "once": true
+    },
+    {
+      "pre": [
+        [
+          "flag",
+          "samir_confronted"
+        ],
+        [
+          "ge",
+          "samir.guilt",
+          8
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Самир сломался и говорит уже не с тобой, а с собственной тенью на песке."
+        ],
+        [
+          "flag",
+          "samir_broke",
+          1
+        ]
+      ],
+      "once": true
+    },
+    {
+      "pre": [
+        [
+          "ge",
+          "player.nights",
+          5
+        ]
+      ],
+      "eff": [
+        [
+          "say",
+          "Пятая ночь в пути; холод сменяет жар, и пустыня начинает торговаться с усталыми."
+        ],
+        [
+          "add",
+          "player.fatigue",
+          1
+        ]
+      ],
+      "once": true
+    }
+  ],
+  "constraints": {
+    "vital": [
+      "player",
+      "leya",
+      "tim",
+      "elder",
+      "samir"
+    ],
+    "min_hp": 1
+  }
+}

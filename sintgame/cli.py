@@ -8,6 +8,7 @@ import argparse
 import json
 
 from . import __version__
+from . import memory as mem
 from .compact import compact
 from .compile_world import compile_world
 from .content import KINDS, add_content
@@ -85,6 +86,9 @@ def main(argv=None):
     p.add_argument("--characters", default="", help="каталог JSON-карточек персонажей")
     p.add_argument("--world", action="append", default=[], help="world.json (NPC → персонажи); можно несколько")
 
+    p = sub.add_parser("memory", help="показать долгую память сохранённой сессии")
+    p.add_argument("save")
+
     p = sub.add_parser("play", help="запустить мир детерминированно")
     p.add_argument("world")
     p.add_argument("--script", default="", help="список action id через запятую")
@@ -94,6 +98,8 @@ def main(argv=None):
     p.add_argument("--context", type=int, default=4, help="сколько недавних событий давать в прозу (0 = выкл)")
     p.add_argument("--state-in", default=None, help="восстановить состояние (вкл. rng)")
     p.add_argument("--state-out", default=None, help="сохранить состояние (вкл. rng)")
+    p.add_argument("--load", default=None, help="загрузить ДОЛГУЮ ПАМЯТЬ + состояние (session.json)")
+    p.add_argument("--save", default=None, help="сохранить ДОЛГУЮ ПАМЯТЬ + состояние")
 
     a = ap.parse_args(argv)
 
@@ -191,6 +197,17 @@ def main(argv=None):
         print(text)
         return 0 if not r["violations"] else 2
 
+    if a.cmd == "memory":
+        s = mem.load_session(a.save)
+        print(f"world: {s.get('world', '')} | ход: {s.get('turn', 0)} | "
+              f"фактов: {len(s.get('memory') or [])}")
+        for f in (s.get("memory") or [])[-12:]:
+            print("  -", f.get("text") if isinstance(f, dict) else str(f))
+        st = s.get("state") or {}
+        if st.get("ended"):
+            print("  концовка:", st["ended"])
+        return 0
+
     if a.cmd == "serve":
         serve_run(host=a.host, port=a.port, worlds=a.world or None,
                   character_dir=a.characters or None)
@@ -198,7 +215,8 @@ def main(argv=None):
 
     if a.cmd == "play":
         play(a.world, [s.strip() for s in a.script.split(",") if s.strip()],
-             a.free, a.prose == "llm", a.variety, a.state_in, a.state_out, a.context)
+             a.free, a.prose == "llm", a.variety, a.state_in, a.state_out, a.context,
+             a.load, a.save)
         return 0
 
     return 0

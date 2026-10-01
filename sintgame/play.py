@@ -102,9 +102,20 @@ def gen_prose(world, tone, label, said, d, cache, use_llm, variety=False, monito
     return txt, ("(agent-live)" if variety else "(agent)")
 
 
-def play(world_path, script, free, use_prose, variety=False, state_in=None, state_out=None, context_n=4):
+def play(world_path, script, free, use_prose, variety=False, state_in=None, state_out=None,
+         context_n=4, load=None, save=None):
     world = load_world(world_path)
     w = World(world)
+    history = []
+    flog = M.FactLog()
+    turn0 = 0
+    if load:
+        sess = M.load_session(load)
+        w.restore(sess["state"])
+        flog = M.FactLog.from_list(sess.get("memory"))
+        history = list(sess.get("history") or [])
+        turn0 = int(sess.get("turn", 0))
+        print(f"  [долгая память: {load} — ход {turn0}, фактов {len(flog.facts)}]")
     if state_in:
         w.restore(json.load(open(state_in)))
         print(f"  [state restored from {state_in}]")
@@ -113,8 +124,6 @@ def play(world_path, script, free, use_prose, variety=False, state_in=None, stat
     tone = world.get("tone", "neutral")
     print(f"== {world.get('title')} | tone={tone} | seed={world.get('seed')} ==")
     turns = list(script)
-    history = []
-    flog = M.FactLog()
 
     while not w.ended:
         label = aid = None
@@ -170,6 +179,11 @@ def play(world_path, script, free, use_prose, variety=False, state_in=None, stat
     if state_out:
         json.dump(w.state(), open(state_out, "w"), ensure_ascii=False)
         print(f"  [state saved to {state_out}]")
+    if save:
+        M.save_session(save, w.state(), flog.to_list(), history,
+                       turn0 + len(history), world.get("title", ""))
+        print(f"  [долгая память сохранена: {save} — ход {turn0 + len(history)}, "
+              f"фактов {len(flog.facts)}]")
 
 
 if __name__ == "__main__":

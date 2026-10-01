@@ -89,7 +89,7 @@ sintgame/intent.py         свободный текст → интент → в
 sintgame/compile_world.py  лор → мир
 sintgame/content.py        генерация контента (NPC/предмет/локация/квест) под верификацией
 sintgame/compact.py        свёртка admitted-действий в мир (v2) + перевалидация
-sintgame/memory.py         долгая память: факты (релевантные) + голоса персонажей
+sintgame/memory.py         долгая память: факты (релевантные) + голоса; сейв сессии между запусками
 sintgame/editor.py         HTML-редактор мира (граф + свидетели + JSON-экспорт)
 sintgame/tune.py           авто-тюнинг числовых параметров под баланс (hill-climb)
 sintgame/run.py            многоэпизодный прогон N ходов с проверкой инвариантов

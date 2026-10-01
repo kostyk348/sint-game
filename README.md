@@ -74,6 +74,11 @@ sintgame tune examples/station/world.json -o tuned.json        # авто-тюн
 sintgame run examples/lighthouse/world.json --turns 60         # прогон 60 ходов
 sintgame sandbox examples/campaign/world.json --turns 500      # открытый прогон 500 ходов
 sintgame compile examples/sandbox/lore.md -o open.json --sandbox  # мир без концовок
+
+# долгая память между сессиями:
+sintgame play examples/lighthouse/world.json --save session.json   # сохранить игру + память
+sintgame play examples/lighthouse/world.json --load session.json   # продолжить позже
+sintgame memory session.json                                       # что игра помнит
 ```
 
 Играть свободным текстом (агент-интент + ворота):
@@ -84,7 +89,7 @@ SINT_GEN_CMD="opencode run --pure" \
   --free "обнять Ию, она плачет"
 ```
 
-Тесты: `make test` (или `python -m pytest -q`) — 48 тестов, без сети.
+Тесты: `make test` (или `python -m pytest -q`) — 51 тест, без сети.
 
 ## 4. Что уже работает
 
@@ -104,8 +109,9 @@ SINT_GEN_CMD="opencode run --pure" \
 - **Создание контента**: `sintgame add` — генерация NPC/предметов/локаций/квестов в
   существующий мир; каждое дополнение верифицируется (схема + мёртвые предпосылки +
   сохранение достижимости концовок).
-- **Долгая память**: факты (в промпт идут только релевантные сцене) + голоса персонажей
-  (`voice`) — для связности на 50+ ходов без раздувания промпта.
+- **Долгая память** (`memory.py`): факты (в промпт идут только релевантные сцене) + голоса
+  персонажей (`voice`) — для связности на 50+ ходов без раздувания промпта. Состояние, факты
+  и история **переживают перезапуск** (`--save`/`--load`, [`docs/MEMORY.md`](docs/MEMORY.md)).
 - **Компакция** (`sintgame compact`): свернуть накопленные рантайм-действия в мир (v2) и
   перевалидировать. **Диагностика** (`sintgame diagnose`): какие атрибуты раздувают
   пространство состояний. **Стоимость** — см. [`docs/COST.md`](docs/COST.md).
@@ -145,7 +151,8 @@ SINT_GEN_CMD="opencode run --pure" \
 - [`docs/GATE.md`](docs/GATE.md) — модель безопасности: почему «нет» — это фича.
 - [`docs/CACHE.md`](docs/CACHE.md) — два кэша: прозы/интента и prompt-cache нейронки.
 - [`docs/COST.md`](docs/COST.md) — сколько токенов за ход и как снизить (6×).
-- [`docs/TOOLING.md`](docs/TOOLING.md) — редактор, баланс, тюнинг, прогон.
+- [`docs/MEMORY.md`](docs/MEMORY.md) — долгая память (состояние + факты между сессиями).
+- [`docs/TOOLING.md`](docs/TOOLING.md) — редактор, баланс, тюнинг, прогон, песочница.
 - [`docs/ROADMAP.md`](docs/ROADMAP.md) — что есть, чего нет, что дальше.
 
 ## 7. Лицензия

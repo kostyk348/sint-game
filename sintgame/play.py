@@ -122,6 +122,7 @@ def play(world_path, script, free, use_prose, variety=False, state_in=None, stat
     cache = load_cache()
     monitor = P.PrefixMonitor()
     tone = world.get("tone", "neutral")
+    mem = M.layering(world)
     print(f"== {world.get('title')} | tone={tone} | seed={world.get('seed')} ==")
     turns = list(script)
 
@@ -165,7 +166,7 @@ def play(world_path, script, free, use_prose, variety=False, state_in=None, stat
         if d:
             print("  [" + "; ".join(d) + "]")
         ids = _referenced_ids(world, said, d)
-        facts = flog.relevant(ids, k=6)
+        facts = mem.set("saga", M.saga_layer(flog.facts)).select(" ".join(said + d), ids, budget=600)
         txt, src = gen_prose(world, tone, label, said, d, cache, use_prose, variety, monitor,
                              history=(history[-context_n:] if context_n else []), facts=facts)
         if txt:

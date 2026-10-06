@@ -80,6 +80,7 @@ def rpg_new(world_path, seed=None):
     sid = "rpg-" + os.urandom(4).hex()
     from . import prompt as _P
     RPG[sid] = {"path": world_path, "world": world, "w": w, "flog": M.FactLog(),
+                "mem": M.layering(world),
                 "history": [], "monitor": _P.PrefixMonitor(), "turn": 0,
                 "seed": w.rng.randint(0, 1 << 30)}
     return _rpg_payload(sid)
@@ -106,7 +107,7 @@ def rpg_act(sid, action_id=None, text=None):
     said = w.act(action_id)
     d = diff(before, w.snapshot())
     ids = _referenced_ids(world, said, d)
-    facts = flog.relevant(ids, k=6)
+    facts = s["mem"].set("saga", M.saga_layer(flog.facts)).select(" ".join(said + d), ids, budget=600)
     prose, _src = gen_prose(world, world.get("tone", "neutral"), label, said, d, CACHE, True,
                             False, s["monitor"], history[-CONTEXT:] if CONTEXT else [], facts)
     history.append(label)

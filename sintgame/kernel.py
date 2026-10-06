@@ -126,8 +126,26 @@ class World:
         if guard >= 100:
             self.hit_guard = True
 
-    def available(self):
-        return [a for a in self.d.get("actions", []) if self.conds(a.get("pre", []))]
+    def available(self, actor=None):
+        out = []
+        for a in self.d.get("actions", []):
+            if a.get("hidden"):
+                continue
+            if actor is not None and a.get("agent") not in (None, actor):
+                continue
+            if self.conds(a.get("pre", [])):
+                out.append(a)
+        return out
+
+    def tick(self):
+        """Время: продвинуть кулдауны и дать сработать периодике (__tick__ + триггеры)."""
+        self.said = []
+        a = self._find("__tick__")
+        if a is not None:
+            for x in a.get("eff", []):
+                self.eff(x)
+        self.fire()
+        return self.said
 
     def _find(self, aid):
         return next((a for a in self.d.get("actions", []) if a["id"] == aid), None)

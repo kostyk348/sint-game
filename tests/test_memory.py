@@ -35,7 +35,20 @@ def test_voices_of():
     assert voices_of(world, ["marek", "iya"]) == {"marek": "молчалив, короткие фразы"}
 
 
+def test_select_budget_and_keys():
+    fl = FactLog()
+    fl.add(1, "Марек отвернулся к стеклу", ["marek"])
+    fl.add(2, "Ия плачет у печи", ["iya"])
+    fl.add(3, "Марек снова молчит", ["marek"])
+    r = fl.select("Марек у стекла", entities=["marek"], budget=600)
+    assert len(r) == 2 and all("Марек" in t for t in r)
+    # бюджет (в символах) режет: помещается ровно один факт
+    tight = fl.select("Марек", entities=["marek"], budget=len("Марек отвернулся к стеклу"))
+    assert len(tight) == 1
+
+
 if __name__ == "__main__":
-    for fn in [test_relevance_by_entities, test_relevance_empty_query, test_bounded_size, test_voices_of]:
+    for fn in [test_relevance_by_entities, test_relevance_empty_query, test_bounded_size,
+               test_voices_of, test_select_budget_and_keys]:
         fn()
         print("ok", fn.__name__)

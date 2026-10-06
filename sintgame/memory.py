@@ -42,6 +42,19 @@ class FactLog:
         scored.sort(key=lambda x: (-x[0], -x[1]))
         return [t for _, _, t in scored[:k]]
 
+    def select(self, context="", entities=None, budget=600):
+        """Бюджетный отбор через ЛОРБУК: ключи = сущности факта, рекурсия по тексту.
+        Возвращает тексты в порядке релевантности; промпт ограничен БЮДЖЕТОМ (не k)."""
+        from .lorebook import Lorebook
+        lb = Lorebook.from_facts(self.facts)
+        ctx = (context or "") + " " + " ".join(entities or [])
+        out = []
+        for eid in lb.select(ctx, budget=budget, entity_ids=entities or []):
+            e = lb.by_id(eid)
+            if e:
+                out.append(e["content"])
+        return out
+
     def to_list(self):
         return list(self.facts)
 
@@ -69,6 +82,34 @@ def voices_of(world, entities):
         if v:
             out[i] = v
     return out
+
+
+def select_facts(facts, context, budget=600):
+    """Выбор долгих фактов как ЗАПИСЕЙ ЛОРБУКА (по контексту, с бюджетом)."""
+    from .lorebook import Lorebook
+    return Lorebook.from_facts(facts).select(context, budget=budget)
+
+
+def saga_layer(facts):
+    """Слой «сага» — долгие факты как записи лорбука (ключи = сущности)."""
+    from .lorebook import Lorebook
+    return Lorebook.from_facts(facts)
+
+
+def layering(world=None, facts=None, budget=1000, title=True):
+    """Слоёная память: constant(ядро) + мир(статика) + сага(факты) под одним бюджетом."""
+    from .lorebook import LayeredMemory, Lorebook
+    m = LayeredMemory(budget=budget)
+    if title and world:
+        t = world.get("title")
+        tone = world.get("tone")
+        if t:
+            m.add_constant(f"{t} (tone: {tone})" if tone else str(t))
+    if world:
+        m.set("world", Lorebook.from_world(world))
+    if facts is not None:
+        m.set("saga", facts if isinstance(facts, Lorebook) else Lorebook.from_facts(facts))
+    return m
 
 
 # --- долгая память между сессиями ---------------------------------------------------

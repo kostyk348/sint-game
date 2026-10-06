@@ -9,6 +9,8 @@ import json
 
 from . import __version__
 from . import memory as mem
+from .abstract import horizon, prove as prove_analysis
+from .compile_ir import compile_ir
 from .compact import compact
 from .compile_world import compile_world
 from .content import KINDS, add_content
@@ -33,9 +35,23 @@ def main(argv=None):
     p.add_argument("--rounds", type=int, default=3)
     p.add_argument("--sandbox", action="store_true", help="открытый мир без обязательных концовок")
 
+    p = sub.add_parser("compile-ir", help="lore.md -> богатая IR (машины/время/агенты) -> плоский мир + доказательства")
+    p.add_argument("lore")
+    p.add_argument("-o", "--out", default="world_ir.json")
+    p.add_argument("--rounds", type=int, default=3)
+
     p = sub.add_parser("validate", help="схема + инварианты + достижимость (BFS со свидетелями)")
     p.add_argument("world")
     p.add_argument("--full", action="store_true", help="полный обход (искать тупики/недостижимость, медленнее)")
+
+    p = sub.add_parser("prove", help="звучий анализ: доказанная недостижимость, инварианты, liveness")
+    p.add_argument("world")
+    p.add_argument("--within", type=int, default=0, help="temporal: что достижимо за <= N шагов")
+
+    p = sub.add_parser("lorebook", help="записи лорбука: активные/выбранные по контексту")
+    p.add_argument("world")
+    p.add_argument("context")
+    p.add_argument("--budget", type=int, default=1200)
 
     p = sub.add_parser("balance", help="распределение концовок по многим прогонам (баланс)")
     p.add_argument("world")
@@ -113,6 +129,32 @@ def main(argv=None):
         print("SIMULATION:", json.dumps(sim, ensure_ascii=False))
         return 0
 
+    if a.cmd == "compile-ir":
+        world, report = compile_ir(open(a.lore).read(), a.rounds)
+        if not world:
+            print("COMPILE-IR FAILED:")
+            for e in (report.get("errors") or []):
+                print("  -", e)
+            return 1
+        json.dump(world, open(a.out, "w"), ensure_ascii=False, indent=2)
+        pr = report.get("proof") or {}
+        print(f"COMPILED-IR -> {a.out}: {world.get('title')}")
+        print(f"  proof: states={pr.get('states')} proven_unreachable={pr.get('proven_unreachable')} "
+              f"invariant_ok={not pr.get('invariant_may_violate')} no_deadends={not pr.get('dead_end_possible')}")
+        if report.get("warnings"):
+            print("  warnings:", report.get("warnings"))
+        return 0
+
+    if a.cmd == "lorebook":
+        from .lorebook import Lorebook
+        d = json.load(open(a.world))
+        lb = Lorebook.from_world(d)
+        ids = sorted(lb.scan(a.context))
+        print("active:", ids)
+        print("selected:", lb.select(a.context, a.budget))
+        print("schema:", json.dumps(lb.selection_schema(ids), ensure_ascii=False))
+        return 0
+
     if a.cmd == "validate":
         d = json.load(open(a.world))
         errs = validate(d)
@@ -123,6 +165,21 @@ def main(argv=None):
             print("SIMULATION:", json.dumps(simulate(d), ensure_ascii=False))
             print(reach_report(d, full=a.full)[0])
         return 0 if not errs else 1
+
+    if a.cmd == "prove":
+        d = json.load(open(a.world))
+        r = prove_analysis(d)
+        print(f"prove: states={r['states']} capped={r['capped']}")
+        print(f"  declared endings : {r['declared']}")
+        print(f"  abstract reachable: {r['reachable_abs']}")
+        print(f"  PROVEN UNREACHABLE: {r['proven_unreachable']}")
+        print(f"  invariant may violate: {r['invariant_may_violate']}")
+        print(f"  dead-end possible    : {r['dead_end_possible']}")
+        if a.within:
+            h = horizon(d, a.within)
+            print(f"  within {h['k']}: reachable={h['within']} "
+                  f"NOT within={h['not_within_k']} states={h['states']}")
+        return 0
 
     if a.cmd == "balance":
         d = json.load(open(a.world))

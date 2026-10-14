@@ -45,19 +45,61 @@
 
 ## 3. Быстрый старт
 
-Нужен Python ≥ 3.9. LLM для компиляции/прозы/интента вызывается через команду
-`SINT_GEN_CMD` (по умолчанию `opencode run --pure`).
+Нужен Python ≥ 3.9. Ядро — чистый stdlib, зависимостей нет, ставить нечего. LLM
+(компиляция лора, проза, разбор свободного текста) подключается снаружи через
+`SINT_GEN_CMD` и **для прохождения примера не нужен**.
+
+### 3.1. Пример мира «из коробки»: `examples/lighthouse`
+
+Четыре команды от клона до конца прохождения. Каждая прогнана на чистом окружении —
+Python 3.14.7, пустой кэш, `SINT_GEN_CMD` не задан, сеть только на шаге 2:
 
 ```bash
-# без установки:
-python -m sintgame validate examples/lighthouse/world.json
-python -m sintgame play examples/lighthouse/world.json \
+# 1) клон
+git clone https://github.com/kostyk348/sint-game.git && cd sint-game
+
+# 2) установка: даёт команду `sintgame` (можно пропустить шаг и звать `python3 -m sintgame`)
+python3 -m venv .venv && .venv/bin/pip install .
+
+# 3) проверка мира: схема, инварианты и достижимость концовок со свидетелями
+.venv/bin/sintgame validate examples/lighthouse/world.json
+
+# 4) прохождение целиком: четыре действия → концовка «правда». Без LLM и без сети.
+.venv/bin/sintgame play examples/lighthouse/world.json \
        --script talk_iya,press_marek,search_cabin,reveal_truth --prose none
+```
 
-# с установкой (даёт команду `sintgame`):
-pip install -e .
-sintgame play examples/lighthouse/world.json
+Шаг 3 печатает:
 
+```
+VALIDATOR: OK
+SIMULATION: {"endings_reached": {"exile": 159, "ice": 69, "truth": 46, "mercy": 26}, "dead_ends": 0, "unstable": 0, "no_ending": 0, "trials": 300, "avg_turns": 11.0}
+reachability: ALL 4 declared endings REACHABLE (witness = proof), states=2067
+```
+
+Шаг 4 печатает прозу мира и заканчивается строкой:
+
+```
+== END: truth | hp=20 hp_max=20 cold=10 warmth=13 | flags=[journal_found,marek_confessed]
+```
+
+`--prose none` — режим без LLM: текст берётся из самого мира, генерация не вызывается,
+состояние и концовка те же, что с LLM (прозе состояние недоступно by design).
+Тот же прогон с прозой от LLM — 4 запроса к модели, ~1 м 40 с, см. [`docs/COST.md`](docs/COST.md).
+
+Свободный текст («прохождение своими словами») требует LLM и проходит через ворота:
+
+```bash
+SINT_GEN_CMD="opencode run --pure" \
+  .venv/bin/sintgame play examples/lighthouse/world.json --free "обнять Ию, она плачет"
+```
+
+Остальные миры — `station`, `campaign` (длинная кампания), `sandbox` (открытый мир без
+концовок): что с каким делать — [`examples/README.md`](examples/README.md).
+
+### 3.2. Остальные команды
+
+```bash
 # скомпилировать свой мир из лора (нужен LLM):
 sintgame compile examples/lighthouse/lore.md -o my_world.json
 
@@ -81,15 +123,9 @@ sintgame play examples/lighthouse/world.json --load session.json   # продо�
 sintgame memory session.json                                       # что игра помнит
 ```
 
-Играть свободным текстом (агент-интент + ворота):
-
-```bash
-SINT_GEN_CMD="opencode run --pure" \
-  python -m sintgame play examples/lighthouse/world.json \
-  --free "обнять Ию, она плачет"
-```
-
-Тесты: `make test` (или `python -m pytest -q`) — 54 теста, без сети.
+Тесты (оффлайн, без сети и без LLM): `make test` или `python -m pytest -q` — **82 теста**.
+Нужен только `pytest`: `pip install -e ".[dev]"` (у самого движка рантайм-зависимостей нет —
+`pip show sint-game` показывает пустой `Requires`).
 
 ## 4. Что уже работает
 

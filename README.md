@@ -3,6 +3,8 @@
 ![ci](https://github.com/kostyk348/sint-game/actions/workflows/ci.yml/badge.svg)
 ![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
 ![python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue)
+[![Release](https://img.shields.io/github/v/release/kostyk348/sint-game?sort=semver&color=blue)](https://github.com/kostyk348/sint-game/releases)
+[![Last commit](https://img.shields.io/github/last-commit/kostyk348/sint-game?branch=main)](https://github.com/kostyk348/sint-game/commits/main)
 
 **Детерминированный движок текстовых LLM-игр.** LLM компилирует сценарий из лора и пишет
 прозу — но состояние мира меняет только обычный код, через **ворота**. Отсюда: никаких
@@ -56,15 +58,19 @@ Python 3.14.7, пустой кэш, `SINT_GEN_CMD` не задан, сеть т�
 
 ```bash
 # 1) клон
+
 git clone https://github.com/kostyk348/sint-game.git && cd sint-game
 
 # 2) установка: даёт команду `sintgame` (можно пропустить шаг и звать `python3 -m sintgame`)
+
 python3 -m venv .venv && .venv/bin/pip install .
 
 # 3) проверка мира: схема, инварианты и достижимость концовок со свидетелями
+
 .venv/bin/sintgame validate examples/lighthouse/world.json
 
 # 4) прохождение целиком: четыре действия → концовка «правда». Без LLM и без сети.
+
 .venv/bin/sintgame play examples/lighthouse/world.json \
        --script talk_iya,press_marek,search_cabin,reveal_truth --prose none
 ```
@@ -101,15 +107,19 @@ SINT_GEN_CMD="opencode run --pure" \
 
 ```bash
 # скомпилировать свой мир из лора (нужен LLM):
+
 sintgame compile examples/lighthouse/lore.md -o my_world.json
 
 # сгенерировать контент в мир (NPC/предмет/локация/квест) под верификацией:
+
 sintgame add examples/lighthouse/world.json --kind npc -n 2 -o enriched.json
 
 # локальный веб-интерфейс: РПГ (главное) + чат (вторично) — открыть в браузере:
+
 sintgame serve --port 8000        # → http://127.0.0.1:8000 (РПГ), /chat — персонажи
 
 # инструменты автора:
+
 sintgame editor examples/lighthouse/world.json -o editor.html   # HTML-редактор + граф
 sintgame balance examples/lighthouse/world.json --trials 3000  # распределение концовок
 sintgame tune examples/station/world.json -o tuned.json        # авто-тюнинг чисел
@@ -118,6 +128,7 @@ sintgame sandbox examples/campaign/world.json --turns 500      # открыты�
 sintgame compile examples/sandbox/lore.md -o open.json --sandbox  # мир без концовок
 
 # долгая память между сессиями:
+
 sintgame play examples/lighthouse/world.json --save session.json   # сохранить игру + память
 sintgame play examples/lighthouse/world.json --load session.json   # продолжить позже
 sintgame memory session.json                                       # что игра помнит

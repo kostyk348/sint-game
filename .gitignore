@@ -17,3 +17,4 @@ save.json
 # research prototypes (не часть репозитория)
 spike/
 spike2/
+/target

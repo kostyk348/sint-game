@@ -1,0 +1,23 @@
+[package]
+name = "sintgame"
+version = "0.3.0"
+edition = "2021"
+rust-version = "1.75"
+description = "Deterministic core of sint-game (LLM proposes — gates decide): kernel, IR lowering, schema validator, CPython-compatible RNG"
+license = "MIT"
+repository = "https://github.com/kostyk348/sint-game"
+readme = "README.md"
+keywords = ["game-engine", "llm", "deterministic", "state-machine"]
+categories = ["game-development"]
+
+[lib]
+name = "sintgame"
+path = "src/lib.rs"
+
+[dependencies]
+serde = "1"
+serde_json = "1"
+
+[profile.release]
+lto = true
+codegen-units = 1

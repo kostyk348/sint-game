@@ -3,6 +3,8 @@
 ![ci](https://github.com/kostyk348/sint-game/actions/workflows/ci.yml/badge.svg)
 ![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
 ![python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue)
+[![Rust core](https://img.shields.io/badge/Rust-ядро%20sintgame-orange)](#ядро-на-rust-sintgame)
+[![golden-verified](https://img.shields.io/badge/golden--verified-против%20Python-22c55e)](#ядро-на-rust-sintgame)
 [![Release](https://img.shields.io/github/v/release/kostyk348/sint-game?sort=semver&color=blue)](https://github.com/kostyk348/sint-game/releases)
 [![Last commit](https://img.shields.io/github/last-commit/kostyk348/sint-game?branch=main)](https://github.com/kostyk348/sint-game/commits/main)
 
@@ -44,6 +46,30 @@
                             ▼                                   ▼
                        играбельный мир                      LLM: проза ──► текст
 ```
+
+## Ядро на Rust (sintgame)
+
+Детерминированная часть движка — то, что действительно должна быть без GIL и
+с жёсткой памятью — перенесена в Rust-крейт `sintgame` (единственная
+зависимость — `serde_json`, формат мира это JSON):
+
+| Модуль | Python | Суть |
+|---|---|---|
+| `src/rng.rs` | `random.Random` | MT19937 **бит-в-бит с CPython**: сейвы и прогоны совместимы в обе стороны |
+| `src/world.rs` | `kernel.py` |conds/effects, каскад триггеров, `state()/restore()` в формате Python |
+| `src/ir.rs` | `ir.py` | понижение машин состояний/времени/агентов + линковка спеки |
+| `src/schema.rs` | `schema.py` | валидатор + `stability`/`simulate` |
+
+**Golden-верификация**: `cargo test` прогоняет 4 example-мира (campaign,
+sandbox, station, lighthouse) и богатую IR-спеку через оба ядра — трассы
+ходов, снимки состояния, полные сейвы (включая 625 слов MT19937), результаты
+`simulate` (концовки/тупики/avg_turns), ошибки валидатора и линковки и вывод
+компилятора IR совпадают побайтно.
+
+Не портировано (и не должно): LLM-обвязка — `chat/gen/prompt` (HTTP-адаптеры),
+`serve`, `editor`, `tune` — это тонкие клей-слои вокруг API, Rust ничего не
+добавляет. Регенерация goldens: `python3 scripts/sintgame_golden.py &&
+python3 scripts/sintgame_make_golden_tests.py`.
 
 ## 3. Быстрый старт
 

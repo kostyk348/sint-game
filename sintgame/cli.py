@@ -22,6 +22,8 @@ from .serve import run as serve_run
 from .schema import simulate, validate
 from .search import diagnose, report as reach_report
 from .tune import tune
+from .why import report as why_report, why_unavailable
+from .blame import blame, endings_universe, report as blame_report
 
 
 def main(argv=None):
@@ -56,6 +58,22 @@ def main(argv=None):
     p = sub.add_parser("balance", help="распределение концовок по многим прогонам (баланс)")
     p.add_argument("world")
     p.add_argument("--trials", type=int, default=2000)
+
+    p = sub.add_parser("why", help="самообъясняющие гейты: почему действие недоступно прямо сейчас")
+    p.add_argument("world")
+    p.add_argument("--action", required=True)
+    p.add_argument("--save", default="", help="state()-словарь из файла (иначе seed)")
+    p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--json", action="store_true", help="машиночитаемый вывод (для intent-слоя)")
+
+    p = sub.add_parser("blame", help="контрфактическая атрибуция: какой гейт блокирует концовку")
+    p.add_argument("world")
+    p.add_argument("--ending", default="", help="id концовки (пусто = все известные)")
+    p.add_argument("--playouts", type=int, default=300)
+    p.add_argument("--depth", type=int, default=120)
+    p.add_argument("--seed0", type=int, default=1000)
+    p.add_argument("--top", type=int, default=8)
+    p.add_argument("--json", action="store_true")
 
     p = sub.add_parser("add", help="сгенерировать контент в мир (npc/item/location/quest) под верификацией")
     p.add_argument("world")
@@ -197,6 +215,30 @@ def main(argv=None):
     if a.cmd == "editor":
         print(f"EDITOR -> {write_editor(a.world, a.out or None)}")
         return 0
+
+    if a.cmd == "why":
+        d = json.load(open(a.world))
+        save = json.load(open(a.save)) if a.save else None
+        res = why_unavailable(d, a.action, seed=a.seed, save=save)
+        print(why_report(res) if not a.json else json.dumps(res, ensure_ascii=False, indent=2))
+        return 0 if res.get("exists") else 2
+
+    if a.cmd == "blame":
+        d = json.load(open(a.world))
+        if a.ending:
+            targets = [a.ending]
+        else:
+            targets = [e for e in endings_universe(d, a.playouts, a.depth, a.seed0)]
+            if not targets:
+                print("blame: в мире нет концовок ([\"end\", id]) и прогоны их не достигли")
+                return 2
+        any_res = None
+        for e in targets:
+            res = blame(d, e, trials=a.playouts, depth=a.depth, seed0=a.seed0, top=a.top)
+            any_res = res
+            print(blame_report(res) if not a.json
+                  else json.dumps(res, ensure_ascii=False, indent=2))
+        return 0 if any_res else 2
 
     if a.cmd == "run":
         d = json.load(open(a.world))

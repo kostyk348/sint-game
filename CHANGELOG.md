@@ -1,4 +1,8 @@
-## [Unreleased]
+# Changelog
+
+Формат — [Keep a Changelog](https://keepachangelog.com/), версии — [SemVer](https://semver.org/).
+
+## [0.3.0] — 2026-11-03
 
 ### Added — Rust core `sintgame` (deterministic kernel, golden-verified)
 
@@ -19,13 +23,12 @@
 LLM glue: `chat/gen/prompt` (HTTP adapters), `serve`, `editor`, `tune`,
 `play` CLI — thin layers around external APIs; Rust adds nothing there.
 
-# Changelog
 
-Формат — [Keep a Changelog](https://keepachangelog.com/), версии — [SemVer](https://semver.org/).
+@@RUST_SECTION@@
 
-## [Unreleased]
+### Earlier in 0.3.0 — rich-IR frontend, lorebook, layered memory
 
-### Added
+#### Added
 - **Лорбук** (`lorebook.py`, `sintgame lorebook <world> "<ctx>"`): записи с ключами,
   рекурсивная активация, постоянные, приоритет и **бюджет**; выбор набора — набор
   boolean-решений, снимаемых **логитами** модели (`selection_schema` + `apply`/`finalize`),
@@ -48,7 +51,7 @@ LLM glue: `chat/gen/prompt` (HTTP adapters), `serve`, `editor`, `tune`,
 - **Rich frontend** (`ir.py`, `compile_game`): машины/время (кулдауны)/агенты → плоское ядро;
   ядро: `World.tick()`, `available(actor)`.
 
-### Fixed
+#### Fixed
 - **Звукость каскада триггеров** в абстракции: MAYBE-триггер мог «сработать», не меняя
   абстрактного состояния, и замыкание **теряло** последствие (абстракция переставала быть
   надмножеством). Заменено на замыкание по триггерам — теперь надмножество гарантировано.
@@ -56,25 +59,25 @@ LLM glue: `chat/gen/prompt` (HTTP adapters), `serve`, `editor`, `tune`,
 - **Типы** `compile_ir`: ошибка — тоже dict (`{"errors": [...]}`), union `list|dict` убран
   (pyright 0 в `cli.py`/`test_ir_frontend.py`).
 
-### Added
+#### Added
 - **РПГ в браузере** (`sintgame serve` → `/`): выбор мира, состояние, доступные действия,
   свободный ввод, **долгая память** (save/load сессии прямо из браузера). Персонажный чат
   переехал на `/chat` (вторичный). Эндпоинты `/api/rpg/*`.
 - Тесты +3 (всего 54).
 
-### Added
+#### Added
 - **Долгая память между сессиями**: `play --save/--load` сохраняют состояние ядра (включая
   `rng`) ВМЕСТЕ с фактами и историей; команда `sintgame memory` показывает, что игра помнит.
   Совместимо со старым форматом. `docs/MEMORY.md`.
 - Тесты +3 (всего 51).
 
-### Added
+#### Added
 - **Локальный веб-чат** (`chat.py`, `serve.py`, `sintgame serve`): персонажный чат в браузере
   на stdlib HTTP. Персонажи — NPC миров (`voice`/`desc`) и/или JSON-карточки; память диалога;
   ответы в роли. Локально, без облака и зависимостей.
 - Тесты +3 (всего 48).
 
-### Added
+#### Added
 - **Открытый песочный режим** (`sandbox.py`, `sintgame sandbox`): миры без обязательных
   концовок (`compile --sandbox`), непрерывные прогоны 500+ шагов, опциональный **директор**,
   добавляющий события в рантайме под воротами.
@@ -84,7 +87,7 @@ LLM glue: `chat/gen/prompt` (HTTP adapters), `serve`, `editor`, `tune`,
   (открытый мир без концовок).
 - Тесты +3 (всего 45).
 
-### Added
+#### Added
 - **Редактор** (`editor.py`, `sintgame editor`): самодостаточный HTML — обзор, свидетели
   достижимости, таблица действий, SVG-граф зависимостей, JSON-экспорт.
 - **Баланс** (`balance`): + средняя длина партии.
@@ -94,7 +97,7 @@ LLM glue: `chat/gen/prompt` (HTTP adapters), `serve`, `editor`, `tune`,
   нестабильных каскадов и авторских инвариантов.
 - `docs/TOOLING.md`; тесты +9 (всего 42).
 
-### Added
+#### Added
 - **Долгая память голосов** (`memory.py`): факты игры + извлечение релевантных сцене (bounded
   prompt); поле `voice` у персонажей (компилятор и генератор контента их заполняют) — для
   консистентности прозы на длинной дистанции.
@@ -106,7 +109,7 @@ LLM glue: `chat/gen/prompt` (HTTP adapters), `serve`, `editor`, `tune`,
   (`tools/opencode/agent/sint-gen.md`) для снижения в ~6×.
 - Тесты: +7 (всего 33), оффлайн.
 
-### Added
+#### Added
 - **Создание контента** (`content.py`, `sintgame add`): генерация NPC/предметов/локаций/
   квестов в существующий мир с верификацией (схема + мёртвые предпосылки + сохранение
   достижимости концовок); откат и переделка при провале.

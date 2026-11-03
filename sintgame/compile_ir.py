@@ -9,6 +9,7 @@
 
 generator инъектируется: логика проверяется без LLM.
 """
+from __future__ import annotations
 from .abstract import prove
 from .gen import gen_json
 from .ir import compile_game, link

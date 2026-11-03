@@ -1,107 +1,116 @@
+<div align="center">
+
 # sint-game
 
 ![ci](https://github.com/kostyk348/sint-game/actions/workflows/ci.yml/badge.svg)
 ![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)
 ![python 3.9+](https://img.shields.io/badge/python-3.9%2B-blue)
-[![Rust core](https://img.shields.io/badge/Rust-ядро%20sintgame-orange)](#ядро-на-rust-sintgame)
-[![golden-verified](https://img.shields.io/badge/golden--verified-против%20Python-22c55e)](#ядро-на-rust-sintgame)
+[![Rust core](https://img.shields.io/badge/Rust-sintgame%20core-orange)](#the-rust-core-sintgame)
+[![golden-verified](https://img.shields.io/badge/golden--verified-vs%20Python-22c55e)](#the-rust-core-sintgame)
 [![Release](https://img.shields.io/github/v/release/kostyk348/sint-game?sort=semver&color=blue)](https://github.com/kostyk348/sint-game/releases)
 [![Last commit](https://img.shields.io/github/last-commit/kostyk348/sint-game?branch=main)](https://github.com/kostyk348/sint-game/commits/main)
 
-**Детерминированный движок текстовых LLM-игр.** LLM компилирует сценарий из лора и пишет
-прозу — но состояние мира меняет только обычный код, через **ворота**. Отсюда: никаких
-выдуманных чисел, воспроизводимые сейвы, тестируемый баланс, дешёвая генерация контента.
+**A deterministic engine for text LLM games.** The LLM compiles a scenario from
+the lore and writes the prose — but the world state is changed only by ordinary
+code, through **gates**. Hence: no invented numbers, reproducible saves,
+testable balance, cheap content generation.
 
-Класс задачи — AI-RPG / интерактивная проза вроде Pax Historia или Character.ai,
-но с архитектурой, где **LLM не держит состояние**.
+The problem class is AI-RPG / interactive fiction like Pax Historia or
+Character.ai, but with an architecture where **the LLM holds no state**.
 
-> Двумя словами: **LLM предлагает — ворота и ядро решают.**
+> In two words: **the LLM proposes — the gates and the kernel decide.**
+
+English · [Русский](README.ru.md)
+
+</div>
 
 ---
 
-## 1. Проблема
+## 1. The problem
 
-Чат-боты «играют роль» текстом. Состояние (золото, HP, отношение NPC, факты сюжета) живёт
-в контекстном окне — оно **обрезается, забывается и галлюцинируется**. Отсюда классика:
-«меч внезапно +7», «NPC забыл, что ты его предал», «у тебя было 50 золота, а стало 300».
+Chat bots "play a role" with text. The state (gold, HP, NPC attitudes, plot
+facts) lives in the context window — it **gets truncated, forgotten and
+hallucinated**. Hence the classics: "the sword is suddenly +7", "the NPC
+forgot you betrayed him", "you had 50 gold, now you have 300".
 
-## 2. Решение
+## 2. The solution
 
-Разделить труд между стохастическим и детерминированным:
+Split the work between the stochastic and the deterministic:
 
-| Слой | Кто делает | Детерминирован? |
+| Layer | Who does it | Deterministic? |
 |---|---|---|
-| **Компиляция мира** (лор → правила) | LLM (оффлайн) | нет, но результат **заморожен** и отревьюен |
-| **Состояние и правила** | ядро (код) | **да**, по seed |
-| **Проза** (оболочка) | LLM (рантайм) | нет, но **состояния не касается** |
-| **Интент** (свободный текст → действие) | LLM (рантайм) | нет, но проходит **ворота** |
+| **World compilation** (lore → rules) | LLM (offline) | no, but the result is **frozen** and reviewed |
+| **State and rules** | the kernel (code) | **yes**, seeded |
+| **Prose** (the shell) | LLM (runtime) | no, but **touches no state** |
+| **Intent** (free text → action) | LLM (runtime) | no, but passes **the gates** |
 
 ```
-ФАЗА 1 — КОМПИЛЯЦИЯ (один раз)            ФАЗА 2 — РАНТАЙМ (каждый ход)
-  lore.md                                   ввод игрока
+PHASE 1 — COMPILATION (once)              PHASE 2 — RUNTIME (every turn)
+  lore.md                                   player input
     │                                          │
     ▼                                          ▼
-  LLM ──► world.json ──► ВАЛИДАТОР         LLM: intent ──► ВОРОТА ──► ядро (состояние)
+  LLM ──► world.json ──► VALIDATOR          LLM: intent ──► GATES ──► kernel (state)
                             │ pass                              │
                             ▼                                   ▼
-                       играбельный мир                      LLM: проза ──► текст
+                       a playable world                     LLM: prose ──► text
 ```
 
-## Ядро на Rust (sintgame)
+## The Rust core (sintgame)
 
-Детерминированная часть движка — то, что действительно должна быть без GIL и
-с жёсткой памятью — перенесена в Rust-крейт `sintgame` (единственная
-зависимость — `serde_json`, формат мира это JSON):
+The deterministic part of the engine — the part that truly wants to be GIL-free
+with hard memory — is ported to the Rust crate `sintgame` (the only dependency
+is `serde_json`; the world format is JSON):
 
-| Модуль | Python | Суть |
+| Module | Python | What it is |
 |---|---|---|
-| `src/rng.rs` | `random.Random` | MT19937 **бит-в-бит с CPython**: сейвы и прогоны совместимы в обе стороны |
-| `src/world.rs` | `kernel.py` |conds/effects, каскад триггеров, `state()/restore()` в формате Python |
-| `src/ir.rs` | `ir.py` | понижение машин состояний/времени/агентов + линковка спеки |
-| `src/schema.rs` | `schema.py` | валидатор + `stability`/`simulate` |
+| `src/rng.rs` | `random.Random` | MT19937 **bit-exact with CPython**: saves and playouts are compatible both ways |
+| `src/world.rs` | `kernel.py` | conds/effects, trigger cascade, `state()/restore()` in the Python format |
+| `src/ir.rs` | `ir.py` | lowering of state machines / time / agents + spec linking |
+| `src/schema.rs` | `schema.py` | validator + `stability`/`simulate` |
 
-**Golden-верификация**: `cargo test` прогоняет 4 example-мира (campaign,
-sandbox, station, lighthouse) и богатую IR-спеку через оба ядра — трассы
-ходов, снимки состояния, полные сейвы (включая 625 слов MT19937), результаты
-`simulate` (концовки/тупики/avg_turns), ошибки валидатора и линковки и вывод
-компилятора IR совпадают побайтно.
+**Golden verification**: `cargo test` runs 4 example worlds (campaign, sandbox,
+station, lighthouse) and a rich IR spec through both cores — turn traces,
+state snapshots, full saves (including the 625 MT19937 words), `simulate`
+results (endings/dead-ends/avg_turns), validator and link errors, and the IR
+compiler output must match byte for byte.
 
-Не портировано (и не должно): LLM-обвязка — `chat/gen/prompt` (HTTP-адаптеры),
-`serve`, `editor`, `tune` — это тонкие клей-слои вокруг API, Rust ничего не
-добавляет. Регенерация goldens: `python3 scripts/sintgame_golden.py &&
+Not ported (on purpose): the LLM glue — `chat/gen/prompt` (HTTP adapters),
+`serve`, `editor`, `tune` — thin layers around external APIs; Rust adds
+nothing there. Golden regeneration: `python3 scripts/sintgame_golden.py &&
 python3 scripts/sintgame_make_golden_tests.py`.
 
-## 3. Быстрый старт
+## 3. Quick start
 
-Нужен Python ≥ 3.9. Ядро — чистый stdlib, зависимостей нет, ставить нечего. LLM
-(компиляция лора, проза, разбор свободного текста) подключается снаружи через
-`SINT_GEN_CMD` и **для прохождения примера не нужен**.
+Python ≥ 3.9 required. The kernel is pure stdlib — no dependencies, nothing to
+install. The LLM (lore compilation, prose, free-text parsing) plugs in
+externally via `SINT_GEN_CMD` and **is not needed to run the example**.
 
-### 3.1. Пример мира «из коробки»: `examples/lighthouse`
+### 3.1. An out-of-the-box world example: `examples/lighthouse`
 
-Четыре команды от клона до конца прохождения. Каждая прогнана на чистом окружении —
-Python 3.14.7, пустой кэш, `SINT_GEN_CMD` не задан, сеть только на шаге 2:
+Four commands from clone to the end of the run. Each was verified on a clean
+environment — Python 3.14.7, empty cache, `SINT_GEN_CMD` unset, network used
+only at step 2:
 
 ```bash
-# 1) клон
+# 1) clone
 
 git clone https://github.com/kostyk348/sint-game.git && cd sint-game
 
-# 2) установка: даёт команду `sintgame` (можно пропустить шаг и звать `python3 -m sintgame`)
+# 2) install: provides the `sintgame` command (you can skip this and call `python3 -m sintgame`)
 
 python3 -m venv .venv && .venv/bin/pip install .
 
-# 3) проверка мира: схема, инварианты и достижимость концовок со свидетелями
+# 3) world check: schema, invariants and witness-based ending reachability
 
 .venv/bin/sintgame validate examples/lighthouse/world.json
 
-# 4) прохождение целиком: четыре действия → концовка «правда». Без LLM и без сети.
+# 4) the full playthrough: four actions → the "truth" ending. No LLM, no network.
 
 .venv/bin/sintgame play examples/lighthouse/world.json \
        --script talk_iya,press_marek,search_cabin,reveal_truth --prose none
 ```
 
-Шаг 3 печатает:
+Step 3 prints:
 
 ```
 VALIDATOR: OK
@@ -109,125 +118,139 @@ SIMULATION: {"endings_reached": {"exile": 159, "ice": 69, "truth": 46, "mercy": 
 reachability: ALL 4 declared endings REACHABLE (witness = proof), states=2067
 ```
 
-Шаг 4 печатает прозу мира и заканчивается строкой:
+Step 4 prints the world's prose and ends with:
 
 ```
 == END: truth | hp=20 hp_max=20 cold=10 warmth=13 | flags=[journal_found,marek_confessed]
 ```
 
-`--prose none` — режим без LLM: текст берётся из самого мира, генерация не вызывается,
-состояние и концовка те же, что с LLM (прозе состояние недоступно by design).
-Тот же прогон с прозой от LLM — 4 запроса к модели, ~1 м 40 с, см. [`docs/COST.md`](docs/COST.md).
+`--prose none` is the no-LLM mode: the text comes from the world itself, no
+generation is called, and the state and ending are the same as with an LLM
+(prose has no access to state by design). The same run with LLM prose is
+4 model requests, ~1 min 40 s — see [`docs/COST.md`](docs/COST.md).
 
-Свободный текст («прохождение своими словами») требует LLM и проходит через ворота:
+Free text ("play it in your own words") requires an LLM and goes through the gates:
 
 ```bash
 SINT_GEN_CMD="opencode run --pure" \
-  .venv/bin/sintgame play examples/lighthouse/world.json --free "обнять Ию, она плачет"
+  .venv/bin/sintgame play examples/lighthouse/world.json --free "hug Iya, she is crying"
 ```
 
-Остальные миры — `station`, `campaign` (длинная кампания), `sandbox` (открытый мир без
-концовок): что с каким делать — [`examples/README.md`](examples/README.md).
+The other worlds — `station`, `campaign` (a long campaign), `sandbox` (an open
+world without endings): what to do with which — [`examples/README.md`](examples/README.md).
 
-### 3.2. Остальные команды
+### 3.2. The other commands
 
 ```bash
-# скомпилировать свой мир из лора (нужен LLM):
+# compile your own world from lore (needs an LLM):
 
 sintgame compile examples/lighthouse/lore.md -o my_world.json
 
-# сгенерировать контент в мир (NPC/предмет/локация/квест) под верификацией:
+# generate content into a world (NPC/item/location/quest) under verification:
 
 sintgame add examples/lighthouse/world.json --kind npc -n 2 -o enriched.json
 
-# локальный веб-интерфейс: РПГ (главное) + чат (вторично) — открыть в браузере:
+# local web UI: an RPG (primary) + chat (secondary) — open in a browser:
 
-sintgame serve --port 8000        # → http://127.0.0.1:8000 (РПГ), /chat — персонажи
+sintgame serve --port 8000        # → http://127.0.0.1:8000 (RPG), /chat — characters
 
-# инструменты автора:
+# author tools:
 
-sintgame editor examples/lighthouse/world.json -o editor.html   # HTML-редактор + граф
-sintgame balance examples/lighthouse/world.json --trials 3000  # распределение концовок
-sintgame tune examples/station/world.json -o tuned.json        # авто-тюнинг чисел
-sintgame run examples/lighthouse/world.json --turns 60         # прогон 60 ходов
-sintgame sandbox examples/campaign/world.json --turns 500      # открытый прогон 500 ходов
-sintgame compile examples/sandbox/lore.md -o open.json --sandbox  # мир без концовок
+sintgame editor examples/lighthouse/world.json -o editor.html   # HTML editor + graph
+sintgame balance examples/lighthouse/world.json --trials 3000  # ending distribution
+sintgame tune examples/station/world.json -o tuned.json        # auto-tuning numbers
+sintgame run examples/lighthouse/world.json --turns 60         # a 60-turn run
+sintgame sandbox examples/campaign/world.json --turns 500      # an open 500-turn run
+sintgame compile examples/sandbox/lore.md -o open.json --sandbox  # a world without endings
 
-# долгая память между сессиями:
+# long-term memory between sessions:
 
-sintgame play examples/lighthouse/world.json --save session.json   # сохранить игру + память
-sintgame play examples/lighthouse/world.json --load session.json   # продолжить позже
-sintgame memory session.json                                       # что игра помнит
+sintgame play examples/lighthouse/world.json --save session.json   # save game + memory
+sintgame play examples/lighthouse/world.json --load session.json   # continue later
+sintgame memory session.json                                       # what the game remembers
 ```
 
-Тесты (оффлайн, без сети и без LLM): `make test` или `python -m pytest -q` — **82 теста**.
-Нужен только `pytest`: `pip install -e ".[dev]"` (у самого движка рантайм-зависимостей нет —
-`pip show sint-game` показывает пустой `Requires`).
+Tests (offline, no network, no LLM): `make test` or `python -m pytest -q` —
+**82 tests**. Only `pytest` is needed: `pip install -e ".[dev]"` (the engine
+itself has no runtime dependencies — `pip show sint-game` shows an empty
+`Requires`).
 
-## 4. Что уже работает
+## 4. What already works
 
-- **Компилятор мира**: `lore.md → world.json` через LLM, выход проходит валидатор
-  (до 3 раундов починки по ошибкам). Оба примера скомпилированы **с первого прохода**.
-- **Детерминированное ядро**: сущности/атрибуты/флаги/предметы/связи/триггеры/действия/концовки.
-- **Валидатор**: схема + инварианты + **точный анализ достижимости** (BFS со свидетелями:
-  конкретная последовательность действий до каждой концовки + статический поиск мёртвых
-  предпосылок «флаг требуется, но нигде не выставляется»).
-- **Ворота** двух уровней: структурные (схема, границы, запрет новых концовок) +
-  авторские инварианты (`constraints.vital`).
-- **Свободный ввод**: LLM разбирает текст в намерение → известное действие, либо
-  **предлагает новое**, которое должно пройти ворота; сопоставляется с уже существующими
-  действиями (не плодит дубли) и **деградирует оффлайн** (без LLM работает сопоставление).
-- **Проза** от LLM, в тоне, **контекстная**: связна с последними событиями (`--context N`),
-  подхватывает описания упомянутых сущностей.
-- **Создание контента**: `sintgame add` — генерация NPC/предметов/локаций/квестов в
-  существующий мир; каждое дополнение верифицируется (схема + мёртвые предпосылки +
-  сохранение достижимости концовок).
-- **Долгая память** (`memory.py`): факты (в промпт идут только релевантные сцене) + голоса
-  персонажей (`voice`) — для связности на 50+ ходов без раздувания промпта. Состояние, факты
-  и история **переживают перезапуск** (`--save`/`--load`, [`docs/MEMORY.md`](docs/MEMORY.md)).
-- **Компакция** (`sintgame compact`): свернуть накопленные рантайм-действия в мир (v2) и
-  перевалидировать. **Диагностика** (`sintgame diagnose`): какие атрибуты раздувают
-  пространство состояний. **Стоимость** — см. [`docs/COST.md`](docs/COST.md).
-- **Инструменты автора** ([`docs/TOOLING.md`](docs/TOOLING.md)): **редактор** (`sintgame editor`
-  — самодостаточный HTML с графом зависимостей и свидетелями), **баланс** (`balance`),
-  **тюнинг** (`tune` — авто-подбор чисел), **прогон** (`run --turns N` — многоэпизодный соак
-  с проверкой инвариантов).
-- **Открытые миры и долгие кампании**: сэндбокс без обязательных концовок
-  (`compile --sandbox`), непрерывные прогоны 500+ шагов (`sandbox`), опциональный **директор**,
-  который добавляет события прямо в рантайме под воротами (механика в духе Pax Historia).
-- **Валидатор стабильности**: ловит петли триггеров (каскад упирается в guard) — иначе
-  компилятор мог собрать мир, ломающийся на первом же ходу.
-- **Локальный веб-интерфейс** (`sintgame serve`): **РПГ в браузере** — выбор мира, состояние,
-  доступные действия и свободный ввод, **долгая память** (save/load сессии). Плюс вторичный
-  персонажный чат на `/chat`. Stdlib HTTP, локально, без облака.
-- **Детерминированный реплей** + режим `--variety` (живость вместо копий).
-- **Сохранение состояния** целиком, **включая `rng`** (иначе сейв/лоад рассинхронится).
-- **Дисциплина prompt-кэша**: стабильный префикс, чтобы кэш нейронки не ломался.
+- **World compiler**: `lore.md → world.json` via an LLM, the output passes the
+  validator (up to 3 fix rounds driven by the errors). Both examples compiled
+  **on the first pass**.
+- **Deterministic kernel**: entities/attributes/flags/items/relations/triggers/
+  actions/endings.
+- **Validator**: schema + invariants + **exact reachability analysis** (BFS
+  with witnesses: a concrete action sequence to every ending + static search
+  for dead preconditions "a flag is required but never set").
+- **Two-level gates**: structural (schema, bounds, no new endings) + author
+  invariants (`constraints.vital`).
+- **Free input**: the LLM parses text into an intent → a known action, or
+  **proposes a new one** that must pass the gates; it is matched against
+  existing actions (no duplicate spam) and **degrades offline** (matching
+  works without an LLM).
+- **Prose** from the LLM, in tone, **contextual**: connected to the latest
+  events (`--context N`), picks up descriptions of mentioned entities.
+- **Content creation**: `sintgame add` — generating NPCs/items/locations/quests
+  into an existing world; every addition is verified (schema + dead
+  preconditions + preserved ending reachability).
+- **Long memory** (`memory.py`): facts (only scene-relevant ones go into the
+  prompt) + character voices (`voice`) — for coherence over 50+ turns without
+  bloating the prompt. State, facts and history **survive restarts**
+  (`--save`/`--load`, [`docs/MEMORY.md`](docs/MEMORY.md)).
+- **Compaction** (`sintgame compact`): fold the accumulated runtime actions
+  back into the world (v2) and re-validate. **Diagnostics** (`sintgame
+  diagnose`): which attributes blow up the state space. **Cost** — see
+  [`docs/COST.md`](docs/COST.md).
+- **Author tools** ([`docs/TOOLING.md`](docs/TOOLING.md)): the **editor**
+  (`sintgame editor` — a self-contained HTML with a dependency graph and
+  witnesses), **balance** (`balance`), **tuning** (`tune` — automatic number
+  fitting), **runs** (`run --turns N` — multi-episode soaks with invariant
+  checks).
+- **Open worlds and long campaigns**: a sandbox without mandatory endings
+  (`compile --sandbox`), continuous 500+ step runs (`sandbox`), an optional
+  **director** that injects events at runtime under the gates (a Pax Historia
+  style mechanic).
+- **Stability validator**: catches trigger loops (the cascade hits the guard) —
+  otherwise the compiler could assemble a world that breaks on turn one.
+- **Local web UI** (`sintgame serve`): an **RPG in the browser** — world
+  selection, state, available actions and free input, **long memory**
+  (session save/load). Plus a secondary character chat at `/chat`. Stdlib
+  HTTP, local, no cloud.
+- **Deterministic replay** + a `--variety` mode (liveliness over copies).
+- **Full state saving, including the `rng`** (otherwise save/load desyncs).
+- **Prompt-cache discipline**: a stable prefix so the model's prompt cache
+  stays warm.
 
-## 5. Честные ограничения
+## 5. Honest limitations
 
-- Это **ядро движка**, а не отгруженная игра. Контент (миры, лор, баланс) — на авторе.
-- Достижимость концовок **доказывается свидетелем** (BFS); при числовых атрибутах полное
-  исчерпание пространства состояний не всегда возможно (нужна абстракция по порогам, см.
-  `docs/ROADMAP.md`) — «не найдено» тогда честно помечается как непроверенное.
-- LLM-части — **секунды**, не миллисекунды; миллисекунды только у ядра.
-- Интент схлопывается в закрытый словарь действий: «обнять» может стать «поговорить»,
-  если такого действия и его предложения нет.
-- Консистентность голосов персонажей на длинной дистанции не проверена.
-- Баланс чисел — ответственность автора, не LLM.
+- This is an **engine core**, not a shipped game. Content (worlds, lore,
+  balance) is on the author.
+- Ending reachability is **proven by a witness** (BFS); with numeric attributes
+  a full exhaustion of the state space is not always possible (threshold
+  abstraction is needed, see `docs/ROADMAP.md`) — "not found" is then honestly
+  marked as unverified.
+- The LLM parts are **seconds**, not milliseconds; only the kernel is
+  milliseconds.
+- Intent collapses into a closed action dictionary: "hug" may become "talk" if
+  there is no such action or proposal.
+- Long-run character voice consistency is unverified.
+- Number balance is the author's responsibility, not the LLM's.
 
-## 6. Документация
+## 6. Documentation
 
-- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — ядро, ворота, кэши, детерминизм.
-- [`docs/FOR-AUTHORS.md`](docs/FOR-AUTHORS.md) — как сделать свою игру из лора.
-- [`docs/COMPILER.md`](docs/COMPILER.md) — как работает компилятор лора.
-- [`docs/GATE.md`](docs/GATE.md) — модель безопасности: почему «нет» — это фича.
-- [`docs/CACHE.md`](docs/CACHE.md) — два кэша: прозы/интента и prompt-cache нейронки.
-- [`docs/COST.md`](docs/COST.md) — сколько токенов за ход и как снизить (6×).
-- [`docs/MEMORY.md`](docs/MEMORY.md) — долгая память (состояние + факты между сессиями).
-- [`docs/TOOLING.md`](docs/TOOLING.md) — редактор, баланс, тюнинг, прогон, песочница.
-- [`docs/ROADMAP.md`](docs/ROADMAP.md) — что есть, чего нет, что дальше.
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — the kernel, gates, caches, determinism.
+- [`docs/FOR-AUTHORS.md`](docs/FOR-AUTHORS.md) — how to make your own game from lore.
+- [`docs/COMPILER.md`](docs/COMPILER.md) — how the lore compiler works.
+- [`docs/GATE.md`](docs/GATE.md) — the safety model: why "no" is a feature.
+- [`docs/CACHE.md`](docs/CACHE.md) — two caches: prose/intent and the model's prompt cache.
+- [`docs/COST.md`](docs/COST.md) — tokens per turn and how to cut them (6×).
+- [`docs/MEMORY.md`](docs/MEMORY.md) — long memory (state + facts between sessions).
+- [`docs/TOOLING.md`](docs/TOOLING.md) — editor, balance, tuning, runs, sandbox.
+- [`docs/ROADMAP.md`](docs/ROADMAP.md) — what exists, what doesn't, what's next.
 
-## 7. Лицензия
+## 7. License
 
-MIT — см. [`LICENSE`](LICENSE).
+MIT — see [`LICENSE`](LICENSE).

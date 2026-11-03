@@ -2,6 +2,36 @@
 
 Формат — [Keep a Changelog](https://keepachangelog.com/), версии — [SemVer](https://semver.org/).
 
+## [0.4.0] — 2026-11-03
+
+### Added — the designer's cockpit: causal answers instead of bare refusals
+
+- **Self-explaining gates** (`sintgame why`, `sintgame/why.py`): every
+  precondition of an action evaluated against the live state (a `state()` save
+  or a seed) with the actual value behind each verdict — "UNAVAILABLE because
+  `iya.trust >= 10` (current: 0)". `--json` feeds the LLM intent layer the
+  blocking subset so it can react instead of guessing; the prose layer can
+  narrate the specific block.
+- **Counterfactual gate attribution** (`sintgame blame`, `sintgame/blame.py`):
+  which gate blocks an ending. Every gate (one precondition of one
+  action/trigger) is relaxed in isolation and the world is re-simulated **on
+  the same seeds** — a paired (common-random-numbers) comparison, not noise.
+  The report ranks gates by the ending's reach-rate gain and states honestly
+  when the block is structural (no single gate moves it). On the station
+  example world: `капсула_рейна` 0.2% -> +50.0% by removing
+  `launch_rein.pre ["flag","rein_confessed"]`; `правда_наружу` 13.5% -> 52.5%
+  via `transmit_to_earth.pre ["has","player","recording"]`, with the second
+  rank surfacing the causal chain (`recover_recording.pre
+  ["flag","android_accessible"]` +13.2%). Deterministic byte for byte.
+- CLI: `sintgame why <world> --action ID [--save S|--seed N] [--json]`,
+  `sintgame blame <world> [--ending ID] [--playouts N] [--depth N] [--top N]
+  [--json]`; docs in `docs/TOOLING.md`, feature bullets in both READMEs.
+
+### Changed
+
+- versions aligned: Python package and the Rust crate both 0.4.0 (the Python
+  `__version__`/pyproject had drifted at 0.1.0 while the crate was 0.3.0).
+
 ## [0.3.0] — 2026-11-03
 
 ### Added — Rust core `sintgame` (deterministic kernel, golden-verified)

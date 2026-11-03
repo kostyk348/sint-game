@@ -204,11 +204,21 @@ itself has no runtime dependencies — `pip show sint-game` shows an empty
   back into the world (v2) and re-validate. **Diagnostics** (`sintgame
   diagnose`): which attributes blow up the state space. **Cost** — see
   [`docs/COST.md`](docs/COST.md).
+- **Self-explaining gates** (`sintgame why`): every precondition of an action
+  evaluated against the live state with actual values — "UNAVAILABLE because
+  `iya.trust >= 10` (current: 0)" instead of a bare refusal; the LLM intent
+  layer and the prose layer can react to the specific block (`--json`).
+- **Counterfactual gate attribution** (`sintgame blame`): which gate blocks an
+  ending — the world is relaxed one gate at a time and re-simulated **on the
+  same seeds** (paired, not noisy); the report ranks gates by the ending's
+  reach-rate gain. On the station example: `капсула_рейна` sits at 0.2% and is
+  unlocked (+50%) by removing `launch_rein.pre ["flag","rein_confessed"]` —
+  measurement, not guesswork. Deterministic end to end.
 - **Author tools** ([`docs/TOOLING.md`](docs/TOOLING.md)): the **editor**
   (`sintgame editor` — a self-contained HTML with a dependency graph and
-  witnesses), **balance** (`balance`), **tuning** (`tune` — automatic number
-  fitting), **runs** (`run --turns N` — multi-episode soaks with invariant
-  checks).
+  witnesses), **balance** (`balance`), **why** (`why`), **blame** (`blame`),
+  **tuning** (`tune` — automatic number fitting), **runs** (`run --turns N` —
+  multi-episode soaks with invariant checks).
 - **Open worlds and long campaigns**: a sandbox without mandatory endings
   (`compile --sandbox`), continuous 500+ step runs (`sandbox`), an optional
   **director** that injects events at runtime under the gates (a Pax Historia
